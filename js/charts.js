@@ -198,10 +198,39 @@ WA.hBar = (id, labels, data) => {
   return chart;
 };
 
+WA.piePctPlugin = {
+  id: "waPiePct",
+  afterDatasetsDraw(chart) {
+    if (chart.config.type !== "doughnut" && chart.config.type !== "pie") return;
+    const values = (chart.data.datasets[0]?.data || []).map((v) => Number(v) || 0);
+    const total = values.reduce((s, v) => s + v, 0);
+    if (!total) return;
+    const meta = chart.getDatasetMeta(0);
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.font = "700 12px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    meta.data.forEach((arc, i) => {
+      const p = values[i] / total * 100;
+      if (p < 3.5) return;
+      const pos = arc.tooltipPosition();
+      const text = p.toFixed(1) + "%";
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "rgba(7,7,18,.55)";
+      ctx.strokeText(text, pos.x, pos.y);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(text, pos.x, pos.y);
+    });
+    ctx.restore();
+  }
+};
+
 WA.pie = (id, labels, data) => {
   WA.baseChart();
   const colors = ["#e94560","#00d26a","#4c8dff","#ffc107","#ff6b6b","#9b59b6","#1abc9c","#f39c12","#3498db","#95a5a6"];
   const values = data.map((v) => Number(v) || 0);
+  const total = values.reduce((s, v) => s + v, 0) || 1;
   const chart = new Chart(document.getElementById(id), {
     type: "doughnut",
     data: {
@@ -213,18 +242,29 @@ WA.pie = (id, labels, data) => {
       maintainAspectRatio: false,
       animation: { ...WA.chartAnim(), animateRotate: true, animateScale: true },
       plugins: {
-        legend: { position: "right" },
+        legend: {
+          position: "right",
+          labels: {
+            generateLabels: (c) => (c.data.labels || []).map((label, i) => ({
+              text: `${label}  ${((values[i] || 0) / total * 100).toFixed(1)}%`,
+              fillStyle: colors[i % colors.length],
+              strokeStyle: "transparent",
+              hidden: false,
+              index: i
+            }))
+          }
+        },
         tooltip: {
           callbacks: {
             label: (ctx) => {
-              const total = values.reduce((s, v) => s + v, 0) || 1;
               const p = (ctx.parsed / total * 100).toFixed(1);
               return `${ctx.label}: ${WA.money2(ctx.parsed)} · ${p}%`;
             }
           }
         }
       }
-    }
+    },
+    plugins: [WA.piePctPlugin]
   });
   WA.pctLegend(id, labels, values);
   return chart;

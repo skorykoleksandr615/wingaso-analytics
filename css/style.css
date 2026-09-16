@@ -203,18 +203,21 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
 .empty { padding: 40px 16px; text-align: center; color: var(--text-secondary); }
 
 .login-body {
-  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
   background: #070712;
 }
 .login-stage {
-  min-height: 100vh;
+  height: 100vh;
   display: grid;
   grid-template-columns: 1.15fr .85fr;
+  align-items: stretch;
 }
 .login-eagle {
   position: relative;
   overflow: hidden;
+  height: 100%;
+  min-height: 0;
   background: #070712;
 }
 .login-eagle img {
@@ -278,8 +281,9 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 32px 36px;
+  height: 100%;
+  min-height: 0;
+  padding: 0 36px;
 }
 .login-panel::before {
   content: "";
@@ -400,14 +404,15 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
   to { opacity: 1; transform: none; }
 }
 @media (max-width: 860px) {
+  .login-body, .login-stage { height: auto; min-height: 100vh; }
   .login-stage { grid-template-columns: 1fr; }
-  .login-eagle { min-height: 38vh; }
+  .login-eagle { height: 38vh; }
   .login-eagle::before {
     background:
       linear-gradient(180deg, transparent 40%, #070712 96%),
       linear-gradient(180deg, rgba(7,7,18,.1), transparent 28%);
   }
-  .login-panel { min-height: auto; padding: 28px 16px 36px; }
+  .login-panel { height: auto; padding: 28px 16px 36px; }
 }
 .logout-link {
   padding: 8px 10px;

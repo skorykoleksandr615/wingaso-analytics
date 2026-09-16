@@ -89,13 +89,13 @@ const LOGIN_PAGE = `<!DOCTYPE html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Command access — WingAso Analytics</title>
+  <title>Sign in — WingAso Analytics</title>
   <meta name="robots" content="noindex,nofollow">
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/eagle-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=2">
+  <link rel="stylesheet" href="/css/style.css?v=3">
 </head>
 <body class="login-body">
   <div class="login-stage">
@@ -107,22 +107,22 @@ const LOGIN_PAGE = `<!DOCTYPE html>
     <main class="login-panel">
       <section class="card login-card">
         <div class="login-brand">
-          <img src="/assets/logo.svg" alt="WingAso">
+          <img src="/assets/eagle-mark.png" alt="">
           <div>
-            <strong>WINGASO</strong>
-            <div class="muted">Analytics command</div>
+            <strong>WingAso</strong>
+            <div class="muted">Analytics</div>
           </div>
         </div>
-        <p class="login-kicker">Restricted access</p>
-        <h1>Enter the nest</h1>
-        <p class="muted">Admin only. Session is sealed after sign-in.</p>
+        <p class="login-kicker">Admin</p>
+        <h1>Welcome back</h1>
+        <p class="muted login-lead">Sign in to open the dashboard.</p>
         <p class="muted" id="err" hidden>Wrong login or password.</p>
         <form method="post" action="/login" autocomplete="on">
-          <label class="muted" for="username">Login</label>
-          <input class="field" id="username" name="username" type="text" required autofocus>
-          <label class="muted" for="password">Password</label>
-          <input class="field" id="password" name="password" type="password" required>
-          <button class="login-btn" type="submit">Open dashboard</button>
+          <label for="username">Login</label>
+          <input class="field" id="username" name="username" type="text" required autofocus placeholder="Your login">
+          <label for="password">Password</label>
+          <input class="field" id="password" name="password" type="password" required placeholder="••••••••">
+          <button class="login-btn" type="submit">Sign in</button>
         </form>
       </section>
     </main>

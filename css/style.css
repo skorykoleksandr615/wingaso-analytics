@@ -275,58 +275,84 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
 }
 .login-panel {
   position: relative;
-  display: grid;
-  place-items: center;
-  padding: 32px 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 7vh 36px 32px;
 }
 .login-panel::before {
   content: "";
   position: absolute;
-  width: 420px;
-  height: 420px;
+  top: 4vh;
+  width: 380px;
+  height: 380px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(233,69,96,.22), transparent 68%);
+  background: radial-gradient(circle, rgba(233,69,96,.2), transparent 68%);
   animation: glowPulse 5s ease-in-out infinite;
 }
 .login-card {
   position: relative;
-  width: min(420px, 100%);
-  padding: 32px 28px 28px;
-  background: rgba(22, 33, 62, .62);
-  border: 1px solid rgba(233,69,96,.35);
-  backdrop-filter: blur(22px);
-  box-shadow: 0 24px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.04) inset;
-  animation: cardIn .9s cubic-bezier(.16,1,.3,1) both;
+  width: min(400px, 100%);
+  padding: 28px 26px 24px;
+  background: linear-gradient(180deg, rgba(26,26,46,.88), rgba(15,15,35,.78));
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 22px;
+  backdrop-filter: blur(28px);
+  box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+  animation: cardIn .85s cubic-bezier(.16,1,.3,1) both;
 }
-.login-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.login-brand img { width: 42px; height: 42px; }
-.login-brand strong { font-size: 22px; letter-spacing: .08em; }
+.login-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.login-brand img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(233,69,96,.25);
+}
+.login-brand strong {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.login-brand .muted { font-size: 13px; }
 .login-kicker {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   color: #e94560;
-  font-size: 12px;
-  letter-spacing: .22em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .16em;
   text-transform: uppercase;
 }
 .login-card h1 {
-  margin: 0 0 8px;
-  font-size: 34px;
+  margin: 0 0 10px;
+  font-size: 32px;
+  line-height: 1.15;
   letter-spacing: -.04em;
 }
-.login-card form { display: grid; gap: 8px; margin-top: 18px; }
+.login-lead { margin: 0 0 4px; font-size: 14px; line-height: 1.5; }
+.login-card form { display: grid; gap: 6px; margin-top: 20px; }
+.login-card label {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c8c8d4;
+}
 .login-card .field {
   width: 100%;
-  padding: 12px 14px;
-  background: rgba(15,15,35,.72);
-  border-color: rgba(255,255,255,.1);
+  height: 48px;
+  padding: 0 14px;
+  background: rgba(7,7,18,.55);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
   transition: border-color .25s ease, box-shadow .25s ease;
 }
 .login-card .field:focus {
   outline: none;
   border-color: #e94560;
-  box-shadow: 0 0 0 4px rgba(233,69,96,.18);
+  box-shadow: 0 0 0 4px rgba(233,69,96,.16);
 }
-.login-card #err { color: #ff6b6b; margin: 0 0 6px; }
+.login-card #err { color: #ff6b6b; margin: 10px 0 0; font-size: 13px; }
 .login-btn {
   position: relative;
   overflow: hidden;
@@ -368,7 +394,7 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
   80%, 100% { transform: translateX(120%); }
 }
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(28px) scale(.98); }
+  from { opacity: 0; transform: translateY(-8px) scale(.98); }
   to { opacity: 1; transform: none; }
 }
 @media (max-width: 860px) {
@@ -379,7 +405,7 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
       linear-gradient(180deg, transparent 40%, #070712 96%),
       linear-gradient(180deg, rgba(7,7,18,.1), transparent 28%);
   }
-  .login-panel { padding: 18px 16px 32px; }
+  .login-panel { padding: 20px 16px 32px; }
 }
 .logout-link {
   padding: 8px 10px;

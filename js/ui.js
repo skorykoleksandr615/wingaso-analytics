@@ -4,7 +4,7 @@ WA.renderHeader = (active) => {
   if (!el) return;
   el.innerHTML = `
     <a class="brand" href="/">
-      <img src="/assets/logo.svg?v=1" alt="WingAso">
+      <img src="/assets/eagle-mark.png?v=3" alt="WingAso">
       <span class="brand-copy">
         <span class="brand-name">WingAso</span>
         <span class="brand-tag">Analytics</span>

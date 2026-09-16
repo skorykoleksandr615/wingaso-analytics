@@ -3,49 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>По дням — WingAso Analytics</title>
-  <meta name="description" content="Календарь конверсий, продаж, выручки и топ-бренда по дням.">
-  <link rel="canonical" href="https://wingasoanalytics.online/daily.html">
+  <title>Приложение — WingAso Analytics</title>
+  <meta name="description" content="Карточка приложения: регистрации, инсталы, депозиты по странам.">
+  <link rel="canonical" href="https://wingasoanalytics.online/app.html">
   <link rel="icon" href="/assets/favicon.png?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css?v=13">
 </head>
-<body data-page="daily">
+<body data-page="app">
   <header class="app-header" id="app-header"></header>
   <main class="wrap" id="content">
     <div class="page-head">
       <div>
-        <h1>По дням</h1>
-        <p class="muted" id="updated"></p>
+        <p class="muted" id="back-link"><a href="/apps.html">← Приложения</a></p>
+        <h1 id="title">Приложение</h1>
+        <p class="muted" id="lead"></p>
       </div>
     </div>
-    <article class="card chart-card" style="margin-bottom:12px">
-      <h2>Топ-5 брендов — выручка</h2>
-      <div class="chart-wrap"><canvas id="stack-area"></canvas></div>
-    </article>
-    <article class="card table-card desktop-only">
+    <section class="kpi-grid" id="kpis"></section>
+    <p class="note" id="geo-note" hidden></p>
+    <section class="grid-2">
+      <article class="card chart-card">
+        <h2>Выручка по дням</h2>
+        <div class="chart-wrap"><canvas id="rev-line"></canvas></div>
+      </article>
+      <article class="card chart-card">
+        <h2>Страны</h2>
+        <div class="chart-wrap"><canvas id="country-bar"></canvas></div>
+      </article>
+    </section>
+    <article class="card table-card desktop-only" style="margin-top:12px">
+      <h2>По странам</h2>
       <div class="table-scroll">
-        <table class="data" id="daily-table">
+        <table class="data" id="country-table">
           <thead>
             <tr>
-              <th>Дата</th>
+              <th>Страна</th>
               <th class="num">Регистрации</th>
               <th class="num">Инсталы</th>
               <th class="num">Депозиты</th>
               <th class="num">Выручка</th>
-              <th>Топ-бренд</th>
-              <th class="num">к предыдущему дню</th>
+              <th class="num">Конверсия</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
     </article>
-    <div class="cards-mobile" id="daily-cards"></div>
+    <div class="cards-mobile" id="app-country-cards"></div>
   </main>
-  <footer class="footer">WingAso Analytics · Резкие скачки выделены</footer>
+  <footer class="footer">WingAso Analytics</footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="/js/data.js?v=4"></script>
   <script src="/js/ui.js?v=4"></script>

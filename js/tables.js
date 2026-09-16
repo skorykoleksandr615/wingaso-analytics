@@ -19,7 +19,7 @@ WA.sortRows = (rows, key, dir) => {
   const m = dir === "asc" ? 1 : -1;
   return rows.slice().sort((a, b) => {
     const va = a[key], vb = b[key];
-    if (typeof va === "string" || typeof vb === "string") return String(va || "").localeCompare(String(vb || "")) * m;
+    if (typeof va === "string" || typeof vb === "string") return String(va || "").localeCompare(String(vb || ""), "ru") * m;
     return ((Number(va) || 0) - (Number(vb) || 0)) * m;
   });
 };
@@ -51,11 +51,11 @@ WA.bindSort = (table, onChange) => {
 
 WA.renderPager = (host, pageObj, onChange) => {
   host.innerHTML = `
-    <span>${WA.num(pageObj.total)} rows · page ${pageObj.pages ? WA.tableState.page : 0}/${pageObj.pages}</span>
+    <span>${WA.num(pageObj.total)} строк · стр. ${pageObj.pages ? WA.tableState.page : 0}/${pageObj.pages}</span>
     <span>
-      <button type="button" data-act="prev">Prev</button>
-      <button type="button" data-act="next">Next</button>
-      <button type="button" data-act="csv">Export CSV</button>
+      <button type="button" data-act="prev">Назад</button>
+      <button type="button" data-act="next">Далее</button>
+      <button type="button" data-act="csv">CSV</button>
     </span>
   `;
   host.querySelector("[data-act=prev]").onclick = () => { if (WA.tableState.page > 1) { WA.tableState.page--; onChange(); } };

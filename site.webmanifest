@@ -1,11 +1,12 @@
 {
-  "name": "WingAso Analytics",
+  "name": "WingAso Аналитика",
   "short_name": "WingAso",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f0f23",
   "theme_color": "#1a1a2e",
   "icons": [
-    { "src": "/assets/logo.svg", "sizes": "any", "type": "image/svg+xml" }
+    { "src": "/assets/favicon.png?v=5", "sizes": "64x64", "type": "image/png" },
+    { "src": "/assets/apple-touch.png?v=5", "sizes": "192x192", "type": "image/png" }
   ]
 }

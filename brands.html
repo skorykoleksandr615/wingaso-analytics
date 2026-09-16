@@ -1,29 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Brands — WingAso Analytics</title>
-  <meta name="description" content="Brand performance table: conversions, leads, sales, revenue, conversion rate and country footprint.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Бренды — WingAso Analytics</title>
+  <meta name="description" content="Таблица брендов: конверсии, лиды, продажи, выручка и страны.">
   <link rel="canonical" href="https://wingasoanalytics.online/brands.html">
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/favicon.png?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css?v=13">
 </head>
 <body data-page="brands">
   <header class="app-header" id="app-header"></header>
   <main class="wrap" id="content">
     <div class="page-head">
       <div>
-        <h1>Brands</h1>
+        <h1>Бренды</h1>
         <p class="muted" id="updated"></p>
       </div>
     </div>
     <div class="toolbar">
-      <input class="search" id="brand-search" placeholder="Search brand">
-      <input class="field" id="min-rev" type="number" min="0" placeholder="Min revenue">
+      <input class="search" id="brand-search" placeholder="Поиск бренда">
+      <input class="field" id="min-rev" type="number" min="0" placeholder="Мин. выручка">
     </div>
     <article class="card table-card desktop-only">
       <div class="table-scroll">
@@ -31,14 +31,14 @@
           <thead>
             <tr>
               <th>#</th>
-              <th data-key="brand" data-dir="asc">Brand</th>
-              <th class="num" data-key="conversions">Conversions</th>
-              <th class="num" data-key="leads">Leads</th>
-              <th class="num" data-key="sales">Sales</th>
-              <th class="num" data-key="revenue">Revenue</th>
-              <th class="num" data-key="rate">Rate</th>
-              <th data-key="countryCount">Countries</th>
-              <th>Trend</th>
+              <th data-key="brand" data-dir="asc">Бренд</th>
+              <th class="num" data-key="leads">Регистрации</th>
+              <th class="num" data-key="installs">Инсталы</th>
+              <th class="num" data-key="sales">Депозиты</th>
+              <th class="num" data-key="revenue">Выручка</th>
+              <th class="num" data-key="rate">Конверсия</th>
+              <th data-key="countryCount">Страны</th>
+              <th>Тренд</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -48,12 +48,12 @@
     </article>
     <div class="cards-mobile" id="brand-cards"></div>
   </main>
-  <footer class="footer">WingAso Analytics · Click a brand for daily and country split</footer>
+  <footer class="footer">WingAso Analytics · Нажмите бренд, чтобы открыть разбивку</footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <script src="/js/data.js"></script>
-  <script src="/js/ui.js"></script>
-  <script src="/js/charts.js"></script>
-  <script src="/js/tables.js"></script>
-  <script src="/js/main.js"></script>
+  <script src="/js/data.js?v=4"></script>
+  <script src="/js/ui.js?v=4"></script>
+  <script src="/js/charts.js?v=4"></script>
+  <script src="/js/tables.js?v=2"></script>
+  <script src="/js/main.js?v=4"></script>
 </body>
 </html>

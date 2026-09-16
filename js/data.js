@@ -9,20 +9,20 @@ const WA = {
 };
 
 WA.ISO = {
-  RU:"Russia",IT:"Italy",BR:"Brazil",GB:"United Kingdom",DE:"Germany",CA:"Canada",ES:"Spain",NL:"Netherlands",PL:"Poland",BE:"Belgium",
-  CL:"Chile",KR:"South Korea",CO:"Colombia",FR:"France",PT:"Portugal",AR:"Argentina",UA:"Ukraine",ZA:"South Africa",AU:"Australia",PE:"Peru",
-  UZ:"Uzbekistan",TR:"Turkey",CZ:"Czechia",BD:"Bangladesh",IN:"India",SA:"Saudi Arabia",EG:"Egypt",PH:"Philippines",GM:"Gambia",VE:"Venezuela",
-  AZ:"Azerbaijan",CI:"Côte d’Ivoire",CH:"Switzerland",MY:"Malaysia",SK:"Slovakia",IE:"Ireland",TJ:"Tajikistan",AT:"Austria",HU:"Hungary",ID:"Indonesia",
-  NG:"Nigeria",BY:"Belarus",NO:"Norway",CD:"DR Congo",HR:"Croatia",BF:"Burkina Faso",MX:"Mexico",TZ:"Tanzania",CM:"Cameroon",ZM:"Zambia",
-  SG:"Singapore",ET:"Ethiopia",GR:"Greece",DK:"Denmark",PK:"Pakistan",LV:"Latvia",FI:"Finland",KG:"Kyrgyzstan",EE:"Estonia",KE:"Kenya",
-  SI:"Slovenia",LK:"Sri Lanka",DZ:"Algeria",BG:"Bulgaria",TG:"Togo",SE:"Sweden",MA:"Morocco",GA:"Gabon",NZ:"New Zealand",UG:"Uganda",
-  GH:"Ghana",MN:"Mongolia",LB:"Lebanon",JO:"Jordan",IQ:"Iraq",IS:"Iceland",LT:"Lithuania",VN:"Vietnam",MR:"Mauritania",EC:"Ecuador",
-  BO:"Bolivia",KZ:"Kazakhstan",BJ:"Benin",OM:"Oman",GE:"Georgia",AE:"UAE",NP:"Nepal",GN:"Guinea",SN:"Senegal",ZW:"Zimbabwe",
-  KW:"Kuwait",MQ:"Martinique",CG:"Congo",MZ:"Mozambique",MM:"Myanmar",TH:"Thailand",MD:"Moldova",ML:"Mali",BH:"Bahrain",QA:"Qatar",
-  RS:"Serbia",TD:"Chad",AO:"Angola",PA:"Panama",TN:"Tunisia",AM:"Armenia",DO:"Dominican Republic",SV:"El Salvador",SL:"Sierra Leone",GT:"Guatemala",
-  RW:"Rwanda",CR:"Costa Rica",NE:"Niger",SY:"Syria",BA:"Bosnia",BW:"Botswana",UY:"Uruguay",LY:"Libya",NA:"Namibia",KH:"Cambodia",
-  LR:"Liberia",SO:"Somalia",SD:"Sudan",MW:"Malawi",MG:"Madagascar",BI:"Burundi",CF:"Central African Republic",CU:"Cuba",HK:"Hong Kong",HT:"Haiti",
-  JM:"Jamaica",JP:"Japan",LU:"Luxembourg",PF:"French Polynesia",RE:"Réunion",YE:"Yemen",MU:"Mauritius",DJ:"Djibouti",PS:"Palestine",US:"United States"
+  RU:"Россия",IT:"Италия",BR:"Бразилия",GB:"Великобритания",DE:"Германия",CA:"Канада",ES:"Испания",NL:"Нидерланды",PL:"Польша",BE:"Бельгия",
+  CL:"Чили",KR:"Южная Корея",CO:"Колумбия",FR:"Франция",PT:"Португалия",AR:"Аргентина",UA:"Украина",ZA:"ЮАР",AU:"Австралия",PE:"Перу",
+  UZ:"Узбекистан",TR:"Турция",CZ:"Чехия",BD:"Бангладеш",IN:"Индия",SA:"Саудовская Аравия",EG:"Египет",PH:"Филиппины",GM:"Гамбия",VE:"Венесуэла",
+  AZ:"Азербайджан",CI:"Кот-д’Ивуар",CH:"Швейцария",MY:"Малайзия",SK:"Словакия",IE:"Ирландия",TJ:"Таджикистан",AT:"Австрия",HU:"Венгрия",ID:"Индонезия",
+  NG:"Нигерия",BY:"Беларусь",NO:"Норвегия",CD:"ДР Конго",HR:"Хорватия",BF:"Буркина-Фасо",MX:"Мексика",TZ:"Танзания",CM:"Камерун",ZM:"Замбия",
+  SG:"Сингапур",ET:"Эфиопия",GR:"Греция",DK:"Дания",PK:"Пакистан",LV:"Латвия",FI:"Финляндия",KG:"Кыргызстан",EE:"Эстония",KE:"Кения",
+  SI:"Словения",LK:"Шри-Ланка",DZ:"Алжир",BG:"Болгария",TG:"Того",SE:"Швеция",MA:"Марокко",GA:"Габон",NZ:"Новая Зеландия",UG:"Уганда",
+  GH:"Гана",MN:"Монголия",LB:"Ливан",JO:"Иордания",IQ:"Ирак",IS:"Исландия",LT:"Литва",VN:"Вьетнам",MR:"Мавритания",EC:"Эквадор",
+  BO:"Боливия",KZ:"Казахстан",BJ:"Бенин",OM:"Оман",GE:"Грузия",AE:"ОАЭ",NP:"Непал",GN:"Гвинея",SN:"Сенегал",ZW:"Зимбабве",
+  KW:"Кувейт",MQ:"Мартиника",CG:"Конго",MZ:"Мозамбик",MM:"Мьянма",TH:"Таиланд",MD:"Молдова",ML:"Мали",BH:"Бахрейн",QA:"Катар",
+  RS:"Сербия",TD:"Чад",AO:"Ангола",PA:"Панама",TN:"Тунис",AM:"Армения",DO:"Доминикана",SV:"Сальвадор",SL:"Сьерра-Леоне",GT:"Гватемала",
+  RW:"Руанда",CR:"Коста-Рика",NE:"Нигер",SY:"Сирия",BA:"Босния",BW:"Ботсвана",UY:"Уругвай",LY:"Ливия",NA:"Намибия",KH:"Камбоджа",
+  LR:"Либерия",SO:"Сомали",SD:"Судан",MW:"Малави",MG:"Мадагаскар",BI:"Бурунди",CF:"ЦАР",CU:"Куба",HK:"Гонконг",HT:"Гаити",
+  JM:"Ямайка",JP:"Япония",LU:"Люксембург",PF:"Французская Полинезия",RE:"Реюньон",YE:"Йемен",MU:"Маврикий",DJ:"Джибути",PS:"Палестина",US:"США"
 };
 
 WA.REGIONS = {
@@ -35,15 +35,45 @@ WA.REGIONS = {
 
 WA.clean = (s) => String(s || "").replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, "").trim();
 
-WA.money = (n) => "$" + (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-WA.money2 = (n) => "$" + (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-WA.num = (n) => (Number(n) || 0).toLocaleString("en-US");
+WA.money = (n) => "$" + (Number(n) || 0).toLocaleString("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+WA.money2 = (n) => "$" + (Number(n) || 0).toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+WA.num = (n) => (Number(n) || 0).toLocaleString("ru-RU");
 WA.pct = (sales, leads) => {
   const l = Number(leads) || 0;
   if (!l) return 0;
   return (Number(sales) || 0) / l * 100;
 };
 WA.pctTxt = (sales, leads) => WA.pct(sales, leads).toFixed(1) + "%";
+WA.hasNum = (n) => n != null && n !== "";
+WA.instTxt = (row) => {
+  if (!row) return "—";
+  if (row.hasInstalls || WA.hasNum(row.installs)) return WA.num(row.installs);
+  return "—";
+};
+WA.localYmd = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+WA.yesterdayYmd = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return WA.localYmd(d);
+};
+WA.href = (path, extra = {}) => {
+  const { range, from, to } = WA.rangeFrom();
+  const u = new URL(path, location.origin);
+  if (range) u.searchParams.set("range", range);
+  if (range === "custom" && from && to) {
+    u.searchParams.set("from", from);
+    u.searchParams.set("to", to);
+  }
+  Object.entries(extra).forEach(([k, v]) => {
+    if (v != null && v !== "") u.searchParams.set(k, v);
+  });
+  return u.pathname + u.search;
+};
 
 async function fetchJson(path) {
   const res = await fetch(path, { cache: "no-store" });
@@ -85,6 +115,9 @@ WA.loadAgg = async () => {
   WA.aggregated = rows.map((r) => ({
     ...r,
     brand: WA.clean(r.brand),
+    package: r.package ? WA.clean(r.package) : "",
+    installs: r.installs,
+    hasInstalls: r.installs != null,
     conversions: (r.leads || 0) + (r.sales || 0)
   }));
   return WA.aggregated;
@@ -123,6 +156,10 @@ WA.bounds = (range, from, to) => {
     d.setUTCDate(d.getUTCDate() - (days - 1));
     return d.toISOString().slice(0, 10);
   };
+  if (range === "yesterday") {
+    const y = WA.yesterdayYmd();
+    return { from: y, to: y };
+  }
   if (range === "7") return { from: shift(7), to: end };
   if (range === "30") return { from: shift(30), to: end };
   if (range === "90") return { from: shift(90), to: end };
@@ -164,11 +201,15 @@ WA.groupBy = (rows, keyFn) => {
   const map = new Map();
   for (const r of rows) {
     const k = keyFn(r);
-    const prev = map.get(k) || { key: k, conversions: 0, leads: 0, sales: 0, revenue: 0, dates: {}, countries: new Set(), brands: new Set(), apps: new Set() };
+    const prev = map.get(k) || { key: k, conversions: 0, leads: 0, sales: 0, revenue: 0, installs: 0, hasInstalls: false, dates: {}, countries: new Set(), brands: new Set(), apps: new Set() };
     prev.conversions += r.conversions || ((r.leads || 0) + (r.sales || 0));
     prev.leads += r.leads || 0;
     prev.sales += r.sales || 0;
     prev.revenue += r.revenue || 0;
+    if (r.hasInstalls || r.installs != null) {
+      prev.hasInstalls = true;
+      prev.installs += Number(r.installs) || 0;
+    }
     prev.dates[r.date] = (prev.dates[r.date] || 0) + (r.revenue || 0);
     if (r.country) prev.countries.add(r.country);
     if (r.brand) prev.brands.add(r.brand);
@@ -194,4 +235,19 @@ WA.regionOf = (code) => {
     if (list.includes(code)) return name;
   }
   return "Other";
+};
+
+WA.brandApps = (brand) => WA.apps.filter((a) => a.brand === WA.clean(brand));
+
+WA.appCountryRows = (pkg, from, to) => {
+  const app = WA.apps.find((a) => a.package === pkg);
+  if (!app) return { rows: [], mode: "missing" };
+  const scoped = WA.aggIn(from, to);
+  const byPackage = scoped.filter((r) => r.package && r.package === pkg);
+  if (byPackage.length) return { rows: byPackage, mode: "package", app };
+  const siblings = WA.brandApps(app.brand);
+  if (siblings.length === 1) {
+    return { rows: scoped.filter((r) => r.brand === app.brand), mode: "brand", app };
+  }
+  return { rows: [], mode: "none", app };
 };

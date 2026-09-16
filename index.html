@@ -1,65 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WingAso Analytics — App Revenue, Conversions &amp; Brands</title>
-  <meta name="description" content="WingAso Analytics dashboard: revenue, conversions, sales, brands, countries and apps. Updated daily. wingasoanalytics.online">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>WingAso Analytics — выручка, конверсии и бренды</title>
+  <meta name="description" content="Дашборд WingAso Analytics: выручка, конверсии, продажи, бренды, страны и приложения.">
   <link rel="canonical" href="https://wingasoanalytics.online/">
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/assets/logo.svg">
+  <link rel="icon" href="/assets/favicon.png?v=5">
+  <link rel="apple-touch-icon" href="/assets/apple-touch.png?v=5">
   <link rel="manifest" href="/site.webmanifest">
   <meta property="og:title" content="WingAso Analytics">
-  <meta property="og:description" content="Live performance dashboard for mobile apps: revenue, conversions, brands and countries.">
+  <meta property="og:description" content="Дашборд по выручке, конверсиям, брендам и странам.">
   <meta property="og:url" content="https://wingasoanalytics.online/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css?v=13">
 </head>
 <body data-page="overview">
   <header class="app-header" id="app-header"></header>
   <main class="wrap" id="content">
     <div class="page-head">
       <div>
-        <h1>Overview</h1>
-        <p class="muted" id="updated">Loading…</p>
+        <h1>Обзор</h1>
+        <p class="muted" id="updated">Загрузка…</p>
       </div>
     </div>
     <section class="kpi-grid" id="kpis"></section>
     <section class="grid-2">
       <article class="card chart-card">
-        <h2>Revenue by day</h2>
+        <h2>Выручка по дням</h2>
         <div class="chart-wrap"><canvas id="rev-line"></canvas></div>
       </article>
       <article class="card chart-card">
-        <h2>Conversions by day</h2>
+        <h2>Конверсии по дням</h2>
         <div class="chart-wrap"><canvas id="conv-bar"></canvas></div>
       </article>
     </section>
     <section class="grid-charts" style="margin-top:12px">
       <article class="card chart-card">
-        <h2>Top 10 brands</h2>
+        <h2>Топ-10 брендов</h2>
         <div class="chart-wrap"><canvas id="brand-bar"></canvas></div>
       </article>
       <article class="card chart-card">
-        <h2>Top 10 countries</h2>
+        <h2>Топ-10 стран</h2>
         <div class="chart-wrap"><canvas id="country-bar"></canvas></div>
       </article>
     </section>
     <section style="margin-top:12px">
       <article class="card chart-card">
-        <h2>Revenue distribution</h2>
+        <h2>Распределение выручки</h2>
         <div class="chart-wrap"><canvas id="brand-pie"></canvas></div>
       </article>
     </section>
   </main>
-  <footer class="footer">WingAso Analytics · wingasoanalytics.online · Data for internal performance review</footer>
+  <footer class="footer">WingAso Analytics · wingasoanalytics.online · Для внутреннего разбора</footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <script src="/js/data.js"></script>
-  <script src="/js/ui.js"></script>
-  <script src="/js/charts.js"></script>
-  <script src="/js/tables.js"></script>
-  <script src="/js/main.js"></script>
+  <script src="/js/data.js?v=4"></script>
+  <script src="/js/ui.js?v=4"></script>
+  <script src="/js/charts.js?v=4"></script>
+  <script src="/js/tables.js?v=2"></script>
+  <script src="/js/main.js?v=4"></script>
 </body>
 </html>

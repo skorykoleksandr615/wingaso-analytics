@@ -1,57 +1,68 @@
 WA.renderHeader = (active) => {
   const { range, from, to } = WA.rangeFrom();
+  const b = WA.bounds(range, from, to);
   const el = document.getElementById("app-header");
   if (!el) return;
   el.innerHTML = `
-    <a class="brand" href="/">
-      <img src="/assets/eagle-mark.png?v=3" alt="WingAso">
+    <a class="brand" href="${WA.href("/")}">
+      <img src="/assets/eagle-mark.png?v=5" alt="WingAso">
       <span class="brand-copy">
         <span class="brand-name">WingAso</span>
-        <span class="brand-tag">Analytics</span>
+        <span class="brand-tag">Аналитика</span>
       </span>
     </a>
     <nav class="nav">
-      <a href="/" class="${active === "overview" ? "active" : ""}">Overview</a>
-      <a href="/brands.html" class="${active === "brands" ? "active" : ""}">Brands</a>
-      <a href="/countries.html" class="${active === "countries" ? "active" : ""}">Countries</a>
-      <a href="/apps.html" class="${active === "apps" ? "active" : ""}">Apps</a>
-      <a href="/daily.html" class="${active === "daily" ? "active" : ""}">Daily</a>
+      <a href="${WA.href("/")}" class="${active === "overview" ? "active" : ""}">Обзор</a>
+      <a href="${WA.href("/brands.html")}" class="${active === "brands" ? "active" : ""}">Бренды</a>
+      <a href="${WA.href("/countries.html")}" class="${active === "countries" ? "active" : ""}">Страны</a>
+      <a href="${WA.href("/apps.html")}" class="${active === "apps" ? "active" : ""}">Приложения</a>
+      <a href="${WA.href("/daily.html")}" class="${active === "daily" ? "active" : ""}">По дням</a>
     </nav>
     <div class="header-tools">
       <select class="period-select" id="range-select">
-        <option value="7">Last 7 days</option>
-        <option value="30">Last 30 days</option>
-        <option value="90">Last 90 days</option>
-        <option value="all">All time</option>
-        <option value="custom">Custom range</option>
+        <option value="yesterday">Вчера</option>
+        <option value="7">7 дней</option>
+        <option value="30">30 дней</option>
+        <option value="90">90 дней</option>
+        <option value="all">Всё время</option>
+        <option value="custom">Диапазон</option>
       </select>
-      <div class="custom-range ${range === "custom" ? "open" : ""}" id="custom-range">
-        <input class="field" type="date" id="from-date">
-        <input class="field" type="date" id="to-date">
+      <div class="custom-range open" id="custom-range">
+        <input class="field" type="date" id="from-date" aria-label="С даты">
+        <span class="range-sep">—</span>
+        <input class="field" type="date" id="to-date" aria-label="По дату">
       </div>
-      <button class="icon-btn" id="theme-btn" title="Toggle theme" type="button">◐</button>
-      <a class="logout-link" href="/logout">Logout</a>
+      <button class="icon-btn" id="theme-btn" title="Тема" type="button">◐</button>
+      <a class="logout-link" href="/logout">Выйти</a>
     </div>
   `;
   const sel = document.getElementById("range-select");
+  const fromEl = document.getElementById("from-date");
+  const toEl = document.getElementById("to-date");
   sel.value = range;
-  document.getElementById("from-date").value = from || WA.meta.period.from;
-  document.getElementById("to-date").value = to || WA.meta.period.to;
+  fromEl.value = range === "custom" && from ? from : b.from;
+  toEl.value = range === "custom" && to ? to : b.to;
+  const min = WA.meta?.period?.from || "";
+  const max = WA.meta?.period?.to || "";
+  if (min) { fromEl.min = min; toEl.min = min; }
+  if (max) { fromEl.max = max; toEl.max = max; }
   sel.addEventListener("change", () => {
     const next = sel.value;
-    document.getElementById("custom-range").classList.toggle("open", next === "custom");
-    if (next !== "custom") {
+    if (next === "custom") {
+      WA.setRange("custom", fromEl.value, toEl.value);
+    } else {
       WA.setRange(next);
-      location.reload();
     }
+    location.reload();
   });
   const applyCustom = () => {
-    if (sel.value !== "custom") return;
-    WA.setRange("custom", document.getElementById("from-date").value, document.getElementById("to-date").value);
+    if (!fromEl.value || !toEl.value) return;
+    sel.value = "custom";
+    WA.setRange("custom", fromEl.value, toEl.value);
     location.reload();
   };
-  document.getElementById("from-date").addEventListener("change", applyCustom);
-  document.getElementById("to-date").addEventListener("change", applyCustom);
+  fromEl.addEventListener("change", applyCustom);
+  toEl.addEventListener("change", applyCustom);
   document.getElementById("theme-btn").addEventListener("click", WA.toggleTheme);
 };
 
@@ -71,7 +82,7 @@ WA.deltaHtml = (cur, prev) => {
   const d = WA.delta(cur, prev);
   const cls = d >= 0 ? "up" : "down";
   const arrow = d >= 0 ? "↑" : "↓";
-  return `<div class="delta ${cls}">${arrow} ${Math.abs(d).toFixed(1)}% vs prev</div>`;
+  return `<div class="delta ${cls}">${arrow} ${Math.abs(d).toFixed(1)}% к пред.</div>`;
 };
 
 WA.sparkSvg = (values) => {
@@ -87,5 +98,5 @@ WA.flag = (code) => `<img class="flag" alt="${code}" src="https://flagcdn.com/24
 
 WA.updated = () => {
   const t = WA.meta?.lastUpdate;
-  return t ? new Date(t).toLocaleString() : "";
+  return t ? new Date(t).toLocaleString("ru-RU") : "";
 };

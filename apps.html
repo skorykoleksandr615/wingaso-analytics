@@ -1,31 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Apps — WingAso Analytics</title>
-  <meta name="description" content="Application packages with brand, conversions, revenue, first seen and last seen dates.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Приложения — WingAso Analytics</title>
+  <meta name="description" content="Пакеты приложений: бренд, конверсии, выручка, первая и последняя дата.">
   <link rel="canonical" href="https://wingasoanalytics.online/apps.html">
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/favicon.png?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css?v=13">
 </head>
 <body data-page="apps">
   <header class="app-header" id="app-header"></header>
   <main class="wrap" id="content">
     <div class="page-head">
       <div>
-        <h1>Apps</h1>
+        <h1>Приложения</h1>
         <p class="muted" id="updated"></p>
       </div>
     </div>
     <div class="toolbar">
-      <input class="search" id="app-search" placeholder="Search package or brand">
+      <input class="search" id="app-search" placeholder="Поиск пакета или бренда">
       <select class="field" id="active-filter">
-        <option value="all">All apps</option>
-        <option value="7">Active last 7 days</option>
+        <option value="all">Все приложения</option>
+        <option value="7">Активны за 7 дней</option>
       </select>
     </div>
     <article class="card table-card desktop-only">
@@ -33,13 +33,15 @@
         <table class="data" id="app-table">
           <thead>
             <tr>
-              <th data-key="package" data-dir="asc">Package</th>
-              <th data-key="brand" data-dir="asc">Brand</th>
-              <th class="num" data-key="conversions">Conversions</th>
-              <th class="num" data-key="revenue">Revenue</th>
-              <th class="num" data-key="countries">Countries</th>
-              <th data-key="first_date" data-dir="asc">First seen</th>
-              <th data-key="last_date">Last seen</th>
+              <th data-key="package" data-dir="asc">Пакет</th>
+              <th data-key="brand" data-dir="asc">Бренд</th>
+              <th class="num" data-key="leads">Регистрации</th>
+              <th class="num" data-key="installs">Инсталы</th>
+              <th class="num" data-key="sales">Депозиты</th>
+              <th class="num" data-key="revenue">Выручка</th>
+              <th class="num" data-key="countries">Страны</th>
+              <th data-key="first_date" data-dir="asc">Первый</th>
+              <th data-key="last_date">Последний</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -51,10 +53,10 @@
   </main>
   <footer class="footer">WingAso Analytics</footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <script src="/js/data.js"></script>
-  <script src="/js/ui.js"></script>
-  <script src="/js/charts.js"></script>
-  <script src="/js/tables.js"></script>
-  <script src="/js/main.js"></script>
+  <script src="/js/data.js?v=4"></script>
+  <script src="/js/ui.js?v=4"></script>
+  <script src="/js/charts.js?v=4"></script>
+  <script src="/js/tables.js?v=2"></script>
+  <script src="/js/main.js?v=4"></script>
 </body>
 </html>

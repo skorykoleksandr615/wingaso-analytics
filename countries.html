@@ -1,35 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Countries — WingAso Analytics</title>
-  <meta name="description" content="Country performance: revenue, conversions, top brand and regional filters for WingAso apps.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Страны — WingAso Analytics</title>
+  <meta name="description" content="Страны: выручка, конверсии, топ-бренд и фильтр по регионам.">
   <link rel="canonical" href="https://wingasoanalytics.online/countries.html">
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/assets/favicon.png?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css?v=13">
 </head>
 <body data-page="countries">
   <header class="app-header" id="app-header"></header>
   <main class="wrap" id="content">
     <div class="page-head">
       <div>
-        <h1>Countries</h1>
+        <h1>Страны</h1>
         <p class="muted" id="updated"></p>
       </div>
     </div>
     <div class="toolbar">
-      <input class="search" id="country-search" placeholder="Search country or ISO">
+      <input class="search" id="country-search" placeholder="Поиск страны или ISO">
       <select class="field" id="region-filter">
-        <option value="">All regions</option>
-        <option>Europe</option>
-        <option>Asia</option>
-        <option>Americas</option>
-        <option>Africa</option>
-        <option>Oceania</option>
+        <option value="">Все регионы</option>
+        <option value="Europe">Европа</option>
+        <option value="Asia">Азия</option>
+        <option value="Americas">Америка</option>
+        <option value="Africa">Африка</option>
+        <option value="Oceania">Океания</option>
       </select>
     </div>
     <article class="card table-card desktop-only">
@@ -38,14 +38,14 @@
           <thead>
             <tr>
               <th>#</th>
-              <th data-key="country" data-dir="asc">Country</th>
-              <th class="num" data-key="conversions">Conversions</th>
-              <th class="num" data-key="leads">Leads</th>
-              <th class="num" data-key="sales">Sales</th>
-              <th class="num" data-key="revenue">Revenue</th>
-              <th class="num" data-key="rate">Rate</th>
-              <th data-key="topBrand" data-dir="asc">Top brand</th>
-              <th>Trend</th>
+              <th data-key="country" data-dir="asc">Страна</th>
+              <th class="num" data-key="leads">Регистрации</th>
+              <th class="num" data-key="installs">Инсталы</th>
+              <th class="num" data-key="sales">Депозиты</th>
+              <th class="num" data-key="revenue">Выручка</th>
+              <th class="num" data-key="rate">Конверсия</th>
+              <th data-key="topBrand" data-dir="asc">Топ-бренд</th>
+              <th>Тренд</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -55,12 +55,12 @@
     </article>
     <div class="cards-mobile" id="country-cards"></div>
   </main>
-  <footer class="footer">WingAso Analytics · Click a country for brand split</footer>
+  <footer class="footer">WingAso Analytics · Нажмите страну, чтобы открыть бренды</footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-  <script src="/js/data.js"></script>
-  <script src="/js/ui.js"></script>
-  <script src="/js/charts.js"></script>
-  <script src="/js/tables.js"></script>
-  <script src="/js/main.js"></script>
+  <script src="/js/data.js?v=4"></script>
+  <script src="/js/ui.js?v=4"></script>
+  <script src="/js/charts.js?v=4"></script>
+  <script src="/js/tables.js?v=2"></script>
+  <script src="/js/main.js?v=4"></script>
 </body>
 </html>

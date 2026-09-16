@@ -472,8 +472,8 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
   to { transform: scale(1.32) translate3d(0, -5%, 0); }
 }
 @keyframes eagleFlyInMobile {
-  from { transform: scale(1); }
-  to { transform: scale(1.04); }
+  from { transform: scale(1.08); }
+  to { transform: scale(1.18); }
 }
 @keyframes eagleHover {
   from { transform: scale(1) translate3d(0, 0, 0); }
@@ -525,14 +525,18 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
     grid-template-columns: 1fr;
     grid-template-rows: min(48vh, 360px) auto;
   }
-  .login-eagle { height: min(48vh, 360px); background: #070712; }
+  .login-eagle { height: min(48vh, 360px); background: #070712; overflow: hidden; }
   .login-eagle-fly {
-    transform-origin: 50% 42%;
+    width: 100%;
+    height: 100%;
+    transform-origin: 50% 40%;
     animation: eagleFlyInMobile 1.5s cubic-bezier(.16, 1, .3, 1) forwards;
   }
   .login-eagle img {
-    object-fit: contain;
-    object-position: 50% 42%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 36%;
   }
   .login-eagle::before {
     background:

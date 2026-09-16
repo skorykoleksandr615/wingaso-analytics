@@ -47,7 +47,9 @@ WA.pctTxt = (sales, leads) => WA.pct(sales, leads).toFixed(1) + "%";
 WA.hasNum = (n) => n != null && n !== "";
 WA.instTxt = (row) => {
   if (!row) return "—";
-  if (row.hasInstalls || WA.hasNum(row.installs)) return WA.num(row.installs);
+  if (row.hasInstalls === true) return WA.num(row.installs || 0);
+  if (row.hasInstalls === false) return "—";
+  if (Object.prototype.hasOwnProperty.call(row, "installs") && row.installs != null) return WA.num(row.installs);
   return "—";
 };
 WA.localYmd = (d) => {

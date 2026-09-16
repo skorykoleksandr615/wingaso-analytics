@@ -95,7 +95,7 @@ const LOGIN_PAGE = `<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=6">
+  <link rel="stylesheet" href="/css/style.css?v=7">
 </head>
 <body class="login-body">
   <div class="login-stage">
@@ -105,26 +105,28 @@ const LOGIN_PAGE = `<!DOCTYPE html>
       <div class="login-sheen"></div>
     </aside>
     <main class="login-panel">
-      <section class="card login-card">
-        <div class="login-brand">
+      <div class="login-stack">
+        <header class="login-head">
           <img src="/assets/eagle-battle.jpg" alt="">
           <div>
             <strong>WingAso</strong>
-            <div class="muted">Analytics</div>
+            <span>Analytics</span>
           </div>
-        </div>
-        <p class="login-kicker">Admin</p>
-        <h1>Welcome back</h1>
-        <p class="muted login-lead">Sign in to open the dashboard.</p>
-        <p class="muted" id="err" hidden>Wrong login or password.</p>
-        <form method="post" action="/login" autocomplete="on">
-          <label for="username">Login</label>
-          <input class="field" id="username" name="username" type="text" required autofocus placeholder="Your login">
-          <label for="password">Password</label>
-          <input class="field" id="password" name="password" type="password" required placeholder="••••••••">
-          <button class="login-btn" type="submit">Sign in</button>
-        </form>
-      </section>
+        </header>
+        <section class="card login-card">
+          <p class="login-kicker">Admin</p>
+          <h1>Welcome back</h1>
+          <p class="muted login-lead">Sign in to open the dashboard.</p>
+          <p class="muted" id="err" hidden>Wrong login or password.</p>
+          <form method="post" action="/login" autocomplete="on">
+            <label for="username">Login</label>
+            <input class="field" id="username" name="username" type="text" required autofocus placeholder="Your login">
+            <label for="password">Password</label>
+            <input class="field" id="password" name="password" type="password" required placeholder="••••••••">
+            <button class="login-btn" type="submit">Sign in</button>
+          </form>
+        </section>
+      </div>
     </main>
   </div>
   <script>

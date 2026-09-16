@@ -30,6 +30,7 @@ WA.renderHeader = (active) => {
         <input class="field" type="date" id="to-date">
       </div>
       <button class="icon-btn" id="theme-btn" title="Toggle theme" type="button">◐</button>
+      <a class="logout-link" href="/logout">Logout</a>
     </div>
   `;
   const sel = document.getElementById("range-select");

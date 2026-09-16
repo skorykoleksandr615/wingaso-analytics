@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin login — WingAso Analytics</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-body">
+  <main class="login-wrap">
+    <section class="card login-card">
+      <div class="login-brand">
+        <img src="/assets/logo.svg" alt="WingAso" width="44" height="44">
+        <div>
+          <strong>WingAso</strong>
+          <div class="muted">Analytics admin</div>
+        </div>
+      </div>
+      <h1>Sign in</h1>
+      <p class="muted" id="err" hidden>Wrong login or password.</p>
+      <form method="post" action="/login" autocomplete="on">
+        <label class="muted" for="username">Login</label>
+        <input class="field" id="username" name="username" type="text" required autofocus>
+        <label class="muted" for="password">Password</label>
+        <input class="field" id="password" name="password" type="password" required>
+        <button class="login-btn" type="submit">Enter dashboard</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    if (new URLSearchParams(location.search).get("e") === "1") {
+      document.getElementById("err").hidden = false;
+    }
+  </script>
+</body>
+</html>

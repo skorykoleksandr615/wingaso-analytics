@@ -171,35 +171,31 @@ WA.pageBrand = async () => {
   const appHead = document.getElementById("apps-head");
   const note = document.getElementById("apps-note");
 
+  const apps = WA.brandApps(name).sort((a, c) => c.revenue - a.revenue);
   if (country) {
     const pkgs = new Set(rows.filter((r) => r.package).map((r) => r.package));
-    let apps = WA.brandApps(name).sort((a, c) => c.revenue - a.revenue);
-    if (pkgs.size) apps = apps.filter((a) => pkgs.has(a.package));
-    else apps = [];
-    if (appHead) appHead.textContent = `Приложения в ${country}`;
+    const scoped = pkgs.size ? apps.filter((a) => pkgs.has(a.package)) : apps;
+    if (appHead) appHead.textContent = `Приложения бренда`;
     if (note) {
       note.hidden = false;
-      note.textContent = apps.length
-        ? `Только приложения с данными по ${country}.`
-        : `В выгрузке нет связки прила × страна. ${name} в ${country} — это бренд в целом, не конкретный пакет.`;
+      note.textContent = pkgs.size
+        ? `Пакеты с трафом в ${country}.`
+        : `Выручка ${country} сверху — по бренду. Имена пакетов ниже; цифры пакета за всё время, в выгрузке нет прила × страна.`;
     }
-    const allLink = WA.href("/brand.html", { b: name });
-    const empty = `<tr><td colspan="8" class="empty">Нет приложений с данными по ${country}. <a href="${allLink}">Все приложения ${name}</a></td></tr>`;
-    appTable.innerHTML = apps.length ? apps.map((a) => WA.appRowHtml(a, country)).join("") : empty;
+    appTable.innerHTML = scoped.length ? scoped.map((a) => WA.appRowHtml(a, country)).join("") : `<tr><td colspan="8" class="empty">Нет приложений по этому бренду.</td></tr>`;
     if (appCards) {
-      appCards.innerHTML = apps.length ? apps.map((a) => WA.appCardHtml(a, country)).join("") : `<article class="card mobile-card"><span class="muted">Нет приложений с данными по ${country}.</span><a href="${allLink}">Все приложения ${name}</a></article>`;
+      appCards.innerHTML = scoped.length ? scoped.map((a) => WA.appCardHtml(a, country)).join("") : `<article class="card mobile-card"><span class="muted">Нет приложений по этому бренду.</span></article>`;
     }
-    appTable.querySelectorAll("tr[data-href]").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
+    WA.bindRowHrefs(appTable);
     return;
   }
 
-  const apps = WA.brandApps(name).sort((a, c) => c.revenue - a.revenue);
   if (note) note.hidden = true;
   appTable.innerHTML = apps.length ? apps.map((a) => WA.appRowHtml(a)).join("") : `<tr><td colspan="8" class="empty">Нет приложений по этому бренду.</td></tr>`;
   if (appCards) {
     appCards.innerHTML = apps.length ? apps.map((a) => WA.appCardHtml(a)).join("") : `<article class="card mobile-card"><span class="muted">Нет приложений по этому бренду.</span></article>`;
   }
-  appTable.querySelectorAll("tr[data-href]").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
+  WA.bindRowHrefs(appTable);
 };
 
 WA.appRowHtml = (a, country) => `
@@ -314,18 +310,20 @@ WA.pageCountry = async () => {
   document.querySelector("#brand-table tbody").innerHTML = byBrand.map((x) => `
     <tr data-href="${WA.href("/brand.html", { b: x.key, c: code })}">
       <td>${x.key}</td>
+      <td class="pkg-cell">${WA.pkgListHtml(x.key, code)}</td>
       <td class="num">${WA.num(x.leads)}</td>
       <td class="num">${WA.instTxt(x)}</td>
       <td class="num">${WA.num(x.sales)}</td>
       <td class="num">${WA.money2(x.revenue)}</td>
       <td class="num">${WA.pctTxt(x.sales, x.leads)}</td>
     </tr>`).join("");
-  document.querySelectorAll("#brand-table tbody tr").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
+  WA.bindRowHrefs(document.querySelector("#brand-table tbody"));
   const brandCards = document.getElementById("country-brand-cards");
   if (brandCards) {
     brandCards.innerHTML = byBrand.map((x) => `
       <a class="card mobile-card" href="${WA.href("/brand.html", { b: x.key, c: code })}">
         <strong>${x.key}</strong>
+        <div class="pkg-list">${WA.brandApps(x.key).sort((a, c) => c.revenue - a.revenue).map((a) => `<span class="mono">${a.package}</span>`).join("")}</div>
         <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
         <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(x.leads)} / ${WA.instTxt(x)} / ${WA.num(x.sales)}</span></div>
         <div class="row"><span class="muted">Конверсия</span><span class="mono">${WA.pctTxt(x.sales, x.leads)}</span></div>

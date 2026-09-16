@@ -223,6 +223,20 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
   animation-delay: calc(var(--i, 0) * 45ms);
 }
 .chart-pct b { color: var(--text-primary); font-weight: 600; margin-right: 4px; }
+.pkg-cell { white-space: normal; min-width: 220px; max-width: 420px; }
+.pkg-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.pkg-link, .pkg-list .mono {
+  font-family: var(--mono);
+  font-size: 12px;
+  word-break: break-all;
+  color: var(--text-primary);
+}
+.pkg-link:hover { color: var(--accent); text-decoration: underline; }
 .note {
   margin: 0 0 12px;
   padding: 10px 12px;

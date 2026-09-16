@@ -241,6 +241,21 @@ WA.regionOf = (code) => {
 
 WA.brandApps = (brand) => WA.apps.filter((a) => a.brand === WA.clean(brand));
 
+WA.pkgListHtml = (brand, country) => {
+  const apps = WA.brandApps(brand).sort((a, c) => (c.revenue || 0) - (a.revenue || 0));
+  if (!apps.length) return "—";
+  return `<div class="pkg-list">${apps.map((a) => `<a class="pkg-link" href="${WA.href("/app.html", { p: a.package, c: country || "" })}">${a.package}</a>`).join("")}</div>`;
+};
+
+WA.bindRowHrefs = (root) => {
+  root.querySelectorAll("tr[data-href]").forEach((tr) => {
+    tr.onclick = (e) => {
+      if (e.target.closest("a")) return;
+      location.href = tr.dataset.href;
+    };
+  });
+};
+
 WA.appCountryRows = (pkg, from, to) => {
   const app = WA.apps.find((a) => a.package === pkg);
   if (!app) return { rows: [], mode: "missing" };

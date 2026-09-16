@@ -399,7 +399,7 @@ WA.pageApp = async () => {
     document.getElementById("lead").textContent = "Пакет не найден в выгрузке.";
     return;
   }
-  document.getElementById("lead").textContent = `${app.brand} · ${WA.money2(app.revenue)} · ${WA.num(app.leads)} рег. · ${WA.instTxt(app)} инст. · ${WA.num(app.sales)} деп. · ${b.from} → ${b.to}`;
+  document.getElementById("lead").textContent = `${app.brand} · пакет за всё время: ${WA.money2(app.revenue)} · ${WA.num(app.leads)} рег. · ${WA.instTxt(app)} инст. · ${WA.num(app.sales)} деп. · графики ${b.from} → ${b.to}`;
   const kpis = document.getElementById("kpis");
   if (kpis) {
     kpis.innerHTML = [

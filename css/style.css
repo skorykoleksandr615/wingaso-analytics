@@ -221,8 +221,8 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 55% 20%;
-  transform: scale(1.12);
+  object-position: 52% 6%;
+  transform: scale(1.12) translate3d(0, -4%, 0);
   animation: eagleDrift 22s ease-in-out infinite alternate;
 }
 .login-eagle::before,
@@ -379,8 +379,8 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
 }
 .login-btn:hover { filter: brightness(1.08); }
 @keyframes eagleDrift {
-  from { transform: scale(1.12) translate3d(0,0,0); }
-  to { transform: scale(1.2) translate3d(-3%, 2%, 0); }
+  from { transform: scale(1.12) translate3d(0, -4%, 0); }
+  to { transform: scale(1.2) translate3d(-3%, -6%, 0); }
 }
 @keyframes glowPulse {
   0%, 100% { opacity: .55; }

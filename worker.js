@@ -10,8 +10,13 @@ const PUBLIC = [
   /^\/site\.webmanifest$/
 ];
 
+function normPath(path) {
+  if (path.length > 1 && path.endsWith("/")) return path.slice(0, -1);
+  return path;
+}
+
 function isPublic(path) {
-  return PUBLIC.some((re) => re.test(path));
+  return PUBLIC.some((re) => re.test(normPath(path)));
 }
 
 function parseCookie(header) {
@@ -79,6 +84,52 @@ function redirect(url, headers) {
   return new Response(null, { status: 302, headers: { Location: url, ...headers } });
 }
 
+const LOGIN_PAGE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin login — WingAso Analytics</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-body">
+  <main class="login-wrap">
+    <section class="card login-card">
+      <div class="login-brand">
+        <img src="/assets/logo.svg" alt="WingAso" width="44" height="44">
+        <div>
+          <strong>WingAso</strong>
+          <div class="muted">Analytics admin</div>
+        </div>
+      </div>
+      <h1>Sign in</h1>
+      <p class="muted" id="err" hidden>Wrong login or password.</p>
+      <form method="post" action="/login" autocomplete="on">
+        <label class="muted" for="username">Login</label>
+        <input class="field" id="username" name="username" type="text" required autofocus>
+        <label class="muted" for="password">Password</label>
+        <input class="field" id="password" name="password" type="password" required>
+        <button class="login-btn" type="submit">Enter dashboard</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    if (new URLSearchParams(location.search).get("e") === "1") {
+      document.getElementById("err").hidden = false;
+    }
+  </script>
+</body>
+</html>`;
+
+function loginPage() {
+  return new Response(LOGIN_PAGE, {
+    status: 200,
+    headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" }
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -91,9 +142,10 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
+    const path = normPath(url.pathname);
     const authed = await validSession(request, env);
 
-    if ((url.pathname === "/login" || url.pathname === "/login.html") && request.method === "POST") {
+    if ((path === "/login" || path === "/login.html") && request.method === "POST") {
       const form = await request.formData();
       const user = String(form.get("username") || "");
       const pass = String(form.get("password") || "");
@@ -105,24 +157,23 @@ export default {
       return redirect("/", { "Set-Cookie": cookieHeader(token, TTL) });
     }
 
-    if (url.pathname === "/logout") {
+    if (path === "/logout") {
       return redirect("/login", { "Set-Cookie": cookieHeader("", 0) });
     }
 
-    if ((url.pathname === "/login" || url.pathname === "/login.html") && authed) {
+    if ((path === "/login" || path === "/login.html") && authed) {
       return redirect("/");
     }
 
-    if (!isPublic(url.pathname) && !authed) {
-      if (url.pathname.startsWith("/data/") || url.pathname.endsWith(".json") || url.pathname.startsWith("/js/")) {
+    if (!isPublic(path) && !authed) {
+      if (path.startsWith("/data/") || path.endsWith(".json") || path.startsWith("/js/")) {
         return new Response("Unauthorized", { status: 401, headers: { "Cache-Control": "no-store" } });
       }
       return redirect("/login");
     }
 
-    if (url.pathname === "/login") {
-      url.pathname = "/login.html";
-      return env.ASSETS.fetch(new Request(url.toString(), request));
+    if (path === "/login" || path === "/login.html") {
+      return loginPage();
     }
 
     const res = await env.ASSETS.fetch(request);

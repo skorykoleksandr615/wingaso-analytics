@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WingAso Analytics — App Revenue, Conversions &amp; Brands</title>
+  <meta name="description" content="WingAso Analytics dashboard: revenue, conversions, sales, brands, countries and apps. Updated daily. wingasoanalytics.online">
+  <link rel="canonical" href="https://wingasoanalytics.online/">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/logo.svg">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta property="og:title" content="WingAso Analytics">
+  <meta property="og:description" content="Live performance dashboard for mobile apps: revenue, conversions, brands and countries.">
+  <meta property="og:url" content="https://wingasoanalytics.online/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="overview">
+  <header class="app-header" id="app-header"></header>
+  <main class="wrap" id="content">
+    <div class="page-head">
+      <div>
+        <h1>Overview</h1>
+        <p class="muted" id="updated">Loading…</p>
+      </div>
+    </div>
+    <section class="kpi-grid" id="kpis"></section>
+    <section class="grid-2">
+      <article class="card chart-card">
+        <h2>Revenue by day</h2>
+        <div class="chart-wrap"><canvas id="rev-line"></canvas></div>
+      </article>
+      <article class="card chart-card">
+        <h2>Conversions by day</h2>
+        <div class="chart-wrap"><canvas id="conv-bar"></canvas></div>
+      </article>
+    </section>
+    <section class="grid-charts" style="margin-top:12px">
+      <article class="card chart-card">
+        <h2>Top 10 brands</h2>
+        <div class="chart-wrap"><canvas id="brand-bar"></canvas></div>
+      </article>
+      <article class="card chart-card">
+        <h2>Top 10 countries</h2>
+        <div class="chart-wrap"><canvas id="country-bar"></canvas></div>
+      </article>
+    </section>
+    <section style="margin-top:12px">
+      <article class="card chart-card">
+        <h2>Revenue distribution</h2>
+        <div class="chart-wrap"><canvas id="brand-pie"></canvas></div>
+      </article>
+    </section>
+  </main>
+  <footer class="footer">WingAso Analytics · wingasoanalytics.online · Data for internal performance review</footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="/js/data.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/tables.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

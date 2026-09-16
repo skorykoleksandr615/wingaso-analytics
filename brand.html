@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brand detail — WingAso Analytics</title>
+  <meta name="description" content="Brand detail: daily revenue, country split and application list.">
+  <link rel="canonical" href="https://wingasoanalytics.online/brand.html">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="brand">
+  <header class="app-header" id="app-header"></header>
+  <main class="wrap" id="content">
+    <div class="page-head">
+      <div>
+        <p class="muted"><a href="/brands.html">← Brands</a></p>
+        <h1 id="title">Brand</h1>
+        <p class="muted" id="lead"></p>
+      </div>
+    </div>
+    <section class="grid-2">
+      <article class="card chart-card">
+        <h2>Revenue by day</h2>
+        <div class="chart-wrap"><canvas id="rev-line"></canvas></div>
+      </article>
+      <article class="card chart-card">
+        <h2>Countries</h2>
+        <div class="chart-wrap"><canvas id="country-bar"></canvas></div>
+      </article>
+    </section>
+    <article class="card table-card" style="margin-top:12px">
+      <h2>Apps</h2>
+      <div class="table-scroll">
+        <table class="data" id="app-table">
+          <thead>
+            <tr>
+              <th>Package</th>
+              <th class="num">Conversions</th>
+              <th class="num">Revenue</th>
+              <th class="num">Countries</th>
+              <th>First seen</th>
+              <th>Last seen</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </article>
+  </main>
+  <footer class="footer">WingAso Analytics</footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="/js/data.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/tables.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

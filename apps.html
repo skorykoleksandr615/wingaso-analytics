@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apps — WingAso Analytics</title>
+  <meta name="description" content="Application packages with brand, conversions, revenue, first seen and last seen dates.">
+  <link rel="canonical" href="https://wingasoanalytics.online/apps.html">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="apps">
+  <header class="app-header" id="app-header"></header>
+  <main class="wrap" id="content">
+    <div class="page-head">
+      <div>
+        <h1>Apps</h1>
+        <p class="muted" id="updated"></p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <input class="search" id="app-search" placeholder="Search package or brand">
+      <select class="field" id="active-filter">
+        <option value="all">All apps</option>
+        <option value="7">Active last 7 days</option>
+      </select>
+    </div>
+    <article class="card table-card desktop-only">
+      <div class="table-scroll">
+        <table class="data" id="app-table">
+          <thead>
+            <tr>
+              <th data-key="package" data-dir="asc">Package</th>
+              <th data-key="brand" data-dir="asc">Brand</th>
+              <th class="num" data-key="conversions">Conversions</th>
+              <th class="num" data-key="revenue">Revenue</th>
+              <th class="num" data-key="countries">Countries</th>
+              <th data-key="first_date" data-dir="asc">First seen</th>
+              <th data-key="last_date">Last seen</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pager" id="app-pager"></div>
+    </article>
+    <div class="cards-mobile" id="app-cards"></div>
+  </main>
+  <footer class="footer">WingAso Analytics</footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="/js/data.js"></script>
+  <script src="/js/ui.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/tables.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

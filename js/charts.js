@@ -227,7 +227,7 @@ WA.piePctPlugin = {
 };
 
 WA.pie = (id, labels, data) => {
-  WA.baseChart();
+  const t = WA.baseChart();
   const colors = ["#e94560","#00d26a","#4c8dff","#ffc107","#ff6b6b","#9b59b6","#1abc9c","#f39c12","#3498db","#95a5a6"];
   const values = data.map((v) => Number(v) || 0);
   const total = values.reduce((s, v) => s + v, 0) || 1;
@@ -245,10 +245,14 @@ WA.pie = (id, labels, data) => {
         legend: {
           position: "right",
           labels: {
+            color: t.text,
+            font: { size: 12, weight: "600" },
+            padding: 10,
             generateLabels: (c) => (c.data.labels || []).map((label, i) => ({
               text: `${label}  ${((values[i] || 0) / total * 100).toFixed(1)}%`,
               fillStyle: colors[i % colors.length],
               strokeStyle: "transparent",
+              fontColor: t.text,
               hidden: false,
               index: i
             }))

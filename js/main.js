@@ -42,6 +42,13 @@ WA.pageOverview = async () => {
   WA.lineChart("rev-line", days.map((d) => d.date.slice(5)), days.map((d) => d.revenue), "Выручка");
   WA.barCompare("conv-bar", days.map((d) => d.date.slice(5)), days.map((d) => d.leads), days.map((d) => d.sales));
 
+  const period = WA.periodLabel(b.from, b.to);
+  const topBrandsTitle = document.getElementById("top-brands-title");
+  const topCountriesTitle = document.getElementById("top-countries-title");
+  const pieTitle = document.getElementById("pie-title");
+  if (topBrandsTitle) topBrandsTitle.textContent = `Топ-10 брендов · ${period}`;
+  if (topCountriesTitle) topCountriesTitle.textContent = `Топ-10 стран · ${period}`;
+  if (pieTitle) pieTitle.textContent = `Распределение выручки · ${period}`;
   const brands = WA.groupBy(rows, (r) => r.brand).sort((a, c) => c.revenue - a.revenue).slice(0, 10);
   const countries = WA.groupBy(rows, (r) => r.country).sort((a, c) => c.revenue - a.revenue).slice(0, 10);
   WA.hBar("brand-bar", brands.map((x) => x.key), brands.map((x) => x.revenue));

@@ -58,6 +58,11 @@ WA.localYmd = (d) => {
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 };
+WA.fmtDay = (ymd) => {
+  if (!ymd || ymd.length < 10) return ymd || "";
+  return `${ymd.slice(8, 10)}.${ymd.slice(5, 7)}.${ymd.slice(0, 4)}`;
+};
+WA.periodLabel = (from, to) => (from && to && from !== to) ? `${WA.fmtDay(from)} — ${WA.fmtDay(to)}` : WA.fmtDay(from || to);
 WA.yesterdayYmd = () => {
   const d = new Date();
   d.setDate(d.getDate() - 1);

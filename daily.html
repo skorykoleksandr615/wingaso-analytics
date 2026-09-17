@@ -22,7 +22,17 @@
       </div>
     </div>
     <article class="card chart-card" style="margin-bottom:12px">
-      <h2>Топ-5 брендов — выручка</h2>
+      <div class="chart-head">
+        <h2 id="stack-title">Топ брендов — выручка</h2>
+        <select class="field" id="top-n" aria-label="Сколько брендов в топе">
+          <option value="3">Топ 3</option>
+          <option value="5">Топ 5</option>
+          <option value="8">Топ 8</option>
+          <option value="10">Топ 10</option>
+          <option value="15">Топ 15</option>
+          <option value="20">Топ 20</option>
+        </select>
+      </div>
       <div class="chart-wrap"><canvas id="stack-area"></canvas></div>
     </article>
     <article class="card table-card desktop-only">

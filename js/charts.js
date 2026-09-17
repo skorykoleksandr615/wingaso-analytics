@@ -396,20 +396,28 @@ WA.pie = (id, labels, data) => {
 };
 
 WA.stackedArea = (id, labels, datasets) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const prev = Chart.getChart(el);
+  if (prev) prev.destroy();
   const t = WA.baseChart();
-  const colors = ["#e94560","#4c8dff","#00d26a","#ffc107","#9b59b6"];
-  return new Chart(document.getElementById(id), {
-    type: "line",
+  const colors = ["#c9a36a","#4c8dff","#00d26a","#e94560","#ffc107","#9b59b6","#1abc9c","#f39c12","#3498db","#ff6b6b","#d4b483","#7eb6ff","#95a5a6","#e67e22","#2ecc71"];
+  const one = labels.length <= 1;
+  const axis = labels.length ? labels : ["—"];
+  return new Chart(el, {
+    type: one ? "bar" : "line",
     data: {
-      labels,
+      labels: axis,
       datasets: datasets.map((d, i) => ({
         label: d.label,
-        data: d.data,
+        data: d.data.length ? d.data : [0],
         borderColor: colors[i % colors.length],
-        backgroundColor: colors[i % colors.length] + "55",
-        fill: true,
+        backgroundColor: one ? colors[i % colors.length] : colors[i % colors.length] + "55",
+        fill: !one,
         tension: .3,
-        pointRadius: 0
+        pointRadius: one ? 0 : (axis.length <= 16 ? 4 : 0),
+        pointHoverRadius: 6,
+        borderWidth: 2
       }))
     },
     options: {
@@ -417,11 +425,22 @@ WA.stackedArea = (id, labels, datasets) => {
       maintainAspectRatio: false,
       animation: WA.chartAnim(),
       interaction: { mode: "index", intersect: false },
-      plugins: { legend: { position: "top" } },
+      layout: { padding: { top: one && datasets.length <= 8 ? 16 : 0 } },
+      plugins: {
+        waBarValue: one && datasets.length <= 8,
+        legend: {
+          position: "top",
+          labels: {
+            color: () => WA.chartTheme().text,
+            font: { size: 12, weight: "600" }
+          }
+        }
+      },
       scales: {
-        x: { ticks: { maxTicksLimit: 8, color: t.tick }, grid: { color: t.grid } },
-        y: { stacked: true, ticks: { color: t.tick }, grid: { color: t.grid } }
+        x: { stacked: one, ticks: { maxTicksLimit: 8, color: t.tick }, grid: { color: one ? "transparent" : t.grid } },
+        y: { stacked: true, ticks: { color: t.tick }, grid: { color: t.grid }, grace: "10%" }
       }
-    }
+    },
+    plugins: [WA.barValuePlugin, WA.legendInkPlugin]
   });
 };

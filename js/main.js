@@ -651,12 +651,26 @@ WA.pageDaily = async () => {
   WA.bindTableSort(document.getElementById("daily-table"), dayState, drawDays);
   drawDays();
   const labels = days.map((d) => d.date.slice(5));
-  const top5 = WA.groupBy(agg, (r) => r.brand).sort((a, c) => c.revenue - a.revenue).slice(0, 5);
-  const datasets = top5.map((brand) => ({
-    label: brand.key,
-    data: days.map((d) => brand.dates[d.date] || 0)
-  }));
-  WA.stackedArea("stack-area", labels, datasets);
+  const ranked = WA.groupBy(agg, (r) => r.brand).sort((a, c) => c.revenue - a.revenue);
+  const topSel = document.getElementById("top-n");
+  const drawStack = () => {
+    const n = Math.max(3, Math.min(20, Number(topSel?.value || localStorage.getItem("wa-top-n") || 5)));
+    if (topSel) topSel.value = String(n);
+    localStorage.setItem("wa-top-n", String(n));
+    const title = document.getElementById("stack-title");
+    if (title) title.textContent = `Топ-${n} брендов — выручка`;
+    const top = ranked.slice(0, n);
+    const datasets = top.map((brand) => ({
+      label: brand.key,
+      data: days.length ? days.map((d) => brand.dates[d.date] || 0) : [0]
+    }));
+    WA.stackedArea("stack-area", labels, datasets);
+  };
+  if (topSel) {
+    topSel.value = localStorage.getItem("wa-top-n") || "5";
+    topSel.onchange = drawStack;
+  }
+  drawStack();
 };
 
 WA.pageDead = async () => {

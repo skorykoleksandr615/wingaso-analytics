@@ -262,6 +262,15 @@ img { max-width: 100%; }
 .grid-2.equal, .grid-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .chart-card { padding: 16px; min-height: 320px; }
 .chart-card h2, .table-card h2 { margin: 0 0 12px; font-size: 16px; }
+.chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.chart-head h2 { margin: 0; }
+.chart-head .field { min-width: 110px; }
 .chart-wrap { position: relative; height: 260px; }
 
 .toolbar {

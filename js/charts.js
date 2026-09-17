@@ -124,12 +124,13 @@ WA.barPctPlugin = {
     const horizontal = chart.options.indexAxis === "y";
     meta.data.forEach((bar, i) => {
       const p = (values[i] / total * 100).toFixed(1) + "%";
+      const text = chart.options.plugins?.waBarMoney ? `${WA.money2(values[i])} · ${p}` : p;
       if (horizontal) {
         ctx.textAlign = "left";
-        ctx.fillText(p, bar.x + 8, bar.y);
+        ctx.fillText(text, bar.x + 8, bar.y);
       } else {
         ctx.textAlign = "center";
-        ctx.fillText(p, bar.x, bar.y - 10);
+        ctx.fillText(text, bar.x, bar.y - 10);
       }
     });
     ctx.restore();
@@ -276,9 +277,17 @@ WA.barCompare = (id, labels, leads, sales) => {
 };
 
 WA.hBar = (id, labels, data) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const prev = Chart.getChart(el);
+  if (prev) prev.destroy();
+  const wrap = el.parentElement;
+  if (wrap && wrap.classList.contains("chart-wrap")) {
+    wrap.style.height = Math.max(240, labels.length * 34 + 24) + "px";
+  }
   const t = WA.baseChart();
   const values = data.map((v) => Number(v) || 0);
-  const chart = new Chart(document.getElementById(id), {
+  const chart = new Chart(el, {
     type: "bar",
     data: {
       labels,
@@ -289,8 +298,9 @@ WA.hBar = (id, labels, data) => {
       responsive: true,
       maintainAspectRatio: false,
       animation: WA.chartAnim(),
-      layout: { padding: { right: 42 } },
+      layout: { padding: { right: 92 } },
       plugins: {
+        waBarMoney: true,
         legend: { display: false },
         tooltip: {
           callbacks: {

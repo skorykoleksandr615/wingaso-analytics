@@ -650,7 +650,7 @@ WA.pageDaily = async () => {
   };
   WA.bindTableSort(document.getElementById("daily-table"), dayState, drawDays);
   drawDays();
-  const labels = days.map((d) => d.date.slice(5));
+  const periodRev = days.reduce((s, d) => s + (d.revenue || 0), 0) || 1;
   const ranked = WA.groupBy(agg, (r) => r.brand).sort((a, c) => c.revenue - a.revenue);
   const topSel = document.getElementById("top-n");
   const drawStack = () => {
@@ -658,13 +658,20 @@ WA.pageDaily = async () => {
     if (topSel) topSel.value = String(n);
     localStorage.setItem("wa-top-n", String(n));
     const title = document.getElementById("stack-title");
-    if (title) title.textContent = `Топ-${n} брендов — выручка`;
+    if (title) title.textContent = `Топ-${n} брендов · ${WA.periodLabel(b.from, b.to)}`;
     const top = ranked.slice(0, n);
-    const datasets = top.map((brand) => ({
-      label: brand.key,
-      data: days.length ? days.map((d) => brand.dates[d.date] || 0) : [0]
-    }));
-    WA.stackedArea("stack-area", labels, datasets);
+    WA.hBar("stack-area", top.map((x) => x.key), top.map((x) => x.revenue));
+    const host = document.getElementById("stack-area")?.closest(".chart-card");
+    if (host) {
+      let el = host.querySelector(".chart-pct");
+      if (!el) {
+        el = document.createElement("div");
+        el.className = "chart-pct";
+        document.getElementById("stack-area").parentElement.after(el);
+      }
+      const share = b.from === b.to ? "дня" : "периода";
+      el.innerHTML = top.map((x, i) => `<span style="--i:${i}"><b>${x.key}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("");
+    }
   };
   if (topSel) {
     topSel.value = localStorage.getItem("wa-top-n") || "5";

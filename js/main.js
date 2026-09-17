@@ -110,12 +110,12 @@ WA.pageBrands = async () => {
       <tr data-href="${WA.href("/brand.html", { b: r.brand })}">
         <td>${(WA.tableState.page - 1) * WA.tableState.perPage + i + 1}</td>
         <td>${r.brand}</td>
-        <td class="num">${WA.num(r.leads)}</td>
+        <td>${r.countryCount} · ${r.countries.split(", ").slice(0, 6).join(", ")}${r.countryCount > 6 ? "…" : ""}</td>
         <td class="num">${WA.instTxt(r)}</td>
+        <td class="num">${WA.num(r.leads)}</td>
         <td class="num">${WA.num(r.sales)}</td>
         <td class="num">${WA.money2(r.revenue)}</td>
         <td class="num">${r.rate.toFixed(1)}%</td>
-        <td>${r.countryCount} · ${r.countries.split(", ").slice(0, 6).join(", ")}${r.countryCount > 6 ? "…" : ""}</td>
         <td>${WA.sparkSvg(r.spark)}</td>
       </tr>`).join("");
     document.getElementById("brand-cards").innerHTML = page.rows.map((r) => `
@@ -129,7 +129,7 @@ WA.pageBrands = async () => {
     WA.renderPager(document.getElementById("brand-pager"), page, draw);
     document.getElementById("brand-pager").oncsv = null;
     document.getElementById("brand-pager").addEventListener("csv", () => {
-      WA.csv("wingaso-brands.csv", ["Бренд","Регистрации","Инсталы","Депозиты","Выручка","Конверсия","Страны"], rows.map((r) => [r.brand, r.leads, r.hasInstalls ? r.installs : "", r.sales, r.revenue.toFixed(2), r.rate.toFixed(1), r.countries]));
+      WA.csv("wingaso-brands.csv", ["Бренд","Страны","Инсталы","Регистрации","Депозиты","Выручка","Конверсия"], rows.map((r) => [r.brand, r.countries, r.hasInstalls ? r.installs : "", r.leads, r.sales, r.revenue.toFixed(2), r.rate.toFixed(1)]));
     }, { once: true });
   };
   WA.bindSort(document.getElementById("brand-table"), draw);
@@ -302,11 +302,11 @@ WA.appRowHtml = (a, country) => {
   return `
   <tr data-href="${WA.href("/app.html", { p: a.package, c: country || "" })}">
     <td class="mono">${a.package}</td>
-    <td class="num">${nd ? "н/д" : WA.num(a.leads)}</td>
+    <td class="num">${nd ? "н/д" : a.countries}</td>
     <td class="num">${nd ? "н/д" : WA.instTxt(a)}</td>
+    <td class="num">${nd ? "н/д" : WA.num(a.leads)}</td>
     <td class="num">${nd ? "н/д" : WA.num(a.sales)}</td>
     <td class="num">${nd ? "н/д" : WA.money2(a.revenue)}</td>
-    <td class="num">${nd ? "н/д" : a.countries}</td>
     <td>${a.first_date || ""}</td>
     <td>${a.last_date || ""}</td>
   </tr>`;
@@ -486,11 +486,11 @@ WA.pageApps = async () => {
       <tr data-href="${WA.href("/app.html", { p: a.package })}">
         <td class="mono">${a.package}</td>
         <td><a href="${WA.href("/brand.html", { b: a.brand })}">${a.brand}</a></td>
-        <td class="num">${WA.num(a.leads)}</td>
+        <td class="num">${a.countries}</td>
         <td class="num">${WA.instTxt(a)}</td>
+        <td class="num">${WA.num(a.leads)}</td>
         <td class="num">${WA.num(a.sales)}</td>
         <td class="num">${WA.money2(a.revenue)}</td>
-        <td class="num">${a.countries}</td>
         <td>${a.first_date || ""}</td>
         <td>${a.last_date || ""}</td>
       </tr>`).join("");
@@ -504,7 +504,7 @@ WA.pageApps = async () => {
     document.querySelectorAll("#app-table tbody tr").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
     WA.renderPager(document.getElementById("app-pager"), page, draw);
     document.getElementById("app-pager").addEventListener("csv", () => {
-      WA.csv("wingaso-apps.csv", ["Пакет","Бренд","Регистрации","Инсталы","Депозиты","Выручка","Страны","Первый","Последний"], rows.map((a) => [a.package, a.brand, a.leads, WA.hasNum(a.installs) ? a.installs : "", a.sales, a.revenue, a.countries, a.first_date, a.last_date]));
+      WA.csv("wingaso-apps.csv", ["Пакет","Бренд","Страны","Инсталы","Регистрации","Депозиты","Выручка","Первый","Последний"], rows.map((a) => [a.package, a.brand, a.countries, WA.hasNum(a.installs) ? a.installs : "", a.leads, a.sales, a.revenue, a.first_date, a.last_date]));
     }, { once: true });
   };
   WA.bindSort(document.getElementById("app-table"), draw);
@@ -735,8 +735,8 @@ WA.pageDead = async () => {
       const inst = deadBrands.reduce((s, r) => s + (Number(r.installs) || 0), 0);
       const leads = deadBrands.reduce((s, r) => s + (Number(r.leads) || 0), 0);
       kpis.innerHTML = [
-        ["Пустых брендов", WA.num(deadBrands.length)],
-        ["Пустых прил", WA.num(deadApps.length)],
+        ["Беспонт брендов", WA.num(deadBrands.length)],
+        ["Беспонт прил", WA.num(deadApps.length)],
         ["Их инсталы", WA.num(inst)],
         ["Их регистрации", WA.num(leads)],
         ["Период", `${WA.fmtDay(b.from)} — ${WA.fmtDay(b.to)}`],
@@ -751,18 +751,18 @@ WA.pageDead = async () => {
       ? brandPage.rows.map((r) => `
         <tr data-href="${WA.href("/brand.html", { b: r.brand })}">
           <td>${r.brand}</td>
-          <td class="num">${WA.num(r.leads)}</td>
+          <td class="num">${WA.num(r.countries)}</td>
           <td class="num">${WA.instTxt(r)}</td>
+          <td class="num">${WA.num(r.leads)}</td>
           <td class="num">${WA.num(r.sales)}</td>
           <td class="num">${WA.money2(r.revenue)}</td>
-          <td class="num">${WA.num(r.countries)}</td>
         </tr>`).join("")
       : `<tr><td colspan="6" class="empty">Нет брендов под этот фильтр.</td></tr>`;
     document.querySelectorAll("#dead-brand-table tbody tr[data-href]").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
     document.getElementById("dead-brand-cards").innerHTML = brandPage.rows.map((r) => `
       <a class="card mobile-card" href="${WA.href("/brand.html", { b: r.brand })}">
         <strong>${r.brand}</strong>
-        <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(r.leads)} / ${WA.instTxt(r)} / ${WA.num(r.sales)}</span></div>
+        <div class="row"><span class="muted">Стран / инст. / рег. / деп.</span><span class="mono">${WA.num(r.countries)} / ${WA.instTxt(r)} / ${WA.num(r.leads)} / ${WA.num(r.sales)}</span></div>
       </a>`).join("");
     WA.renderPager(document.getElementById("dead-brand-pager"), brandPage, () => { draw(); });
 
@@ -776,11 +776,11 @@ WA.pageDead = async () => {
         <tr data-href="${WA.href("/app.html", { p: a.package })}">
           <td class="mono">${a.package}</td>
           <td>${a.brand}</td>
-          <td class="num">${WA.num(a.leads)}</td>
+          <td class="num">${WA.num(a.countries)}</td>
           <td class="num">${WA.instTxt(a)}</td>
+          <td class="num">${WA.num(a.leads)}</td>
           <td class="num">${WA.num(a.sales)}</td>
           <td class="num">${WA.money2(a.revenue)}</td>
-          <td class="num">${WA.num(a.countries)}</td>
         </tr>`).join("")
       : `<tr><td colspan="7" class="empty">Нет прил под этот фильтр.</td></tr>`;
     document.querySelectorAll("#dead-app-table tbody tr[data-href]").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
@@ -788,18 +788,18 @@ WA.pageDead = async () => {
       <a class="card mobile-card" href="${WA.href("/app.html", { p: a.package })}">
         <strong class="mono">${a.package}</strong>
         <div class="row"><span class="muted">Бренд</span><span>${a.brand}</span></div>
-        <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(a.leads)} / ${WA.instTxt(a)} / ${WA.num(a.sales)}</span></div>
+        <div class="row"><span class="muted">Стран / инст. / рег. / деп.</span><span class="mono">${WA.num(a.countries)} / ${WA.instTxt(a)} / ${WA.num(a.leads)} / ${WA.num(a.sales)}</span></div>
       </a>`).join("");
     const appPager = document.getElementById("dead-app-pager");
     WA.renderPager(appPager, { rows: appSlice, total: deadApps.length, pages: appPages }, () => {});
     appPager.querySelector("[data-act=prev]").onclick = () => { if (appPage > 1) { appPage--; draw(); } };
     appPager.querySelector("[data-act=next]").onclick = () => { if (appPage < appPages) { appPage++; draw(); } };
     appPager.querySelector("[data-act=csv]").onclick = () => {
-      WA.csv("wingaso-dead-apps.csv", ["Пакет","Бренд","Регистрации","Инсталы","Депозиты","Выручка","Страны"], deadApps.map((a) => [a.package, a.brand, a.leads, a.installs, a.sales, a.revenue.toFixed(2), a.countries]));
+      WA.csv("wingaso-dead-apps.csv", ["Пакет","Бренд","Страны","Инсталы","Регистрации","Депозиты","Выручка"], deadApps.map((a) => [a.package, a.brand, a.countries, a.installs, a.leads, a.sales, a.revenue.toFixed(2)]));
     };
     document.getElementById("dead-brand-pager").oncsv = null;
     document.getElementById("dead-brand-pager").addEventListener("csv", () => {
-      WA.csv("wingaso-dead-brands.csv", ["Бренд","Регистрации","Инсталы","Депозиты","Выручка","Страны"], deadBrands.map((r) => [r.brand, r.leads, r.installs, r.sales, r.revenue.toFixed(2), r.countries]));
+      WA.csv("wingaso-dead-brands.csv", ["Бренд","Страны","Инсталы","Регистрации","Депозиты","Выручка"], deadBrands.map((r) => [r.brand, r.countries, r.installs, r.leads, r.sales, r.revenue.toFixed(2)]));
     }, { once: true });
   };
   extra.noSale = true;

@@ -1,5 +1,18 @@
 WA.applyTheme();
 
+WA.redrawPage = async () => {
+  WA.destroyCharts();
+  const page = document.body.dataset.page;
+  if (page === "overview") return WA.pageOverview();
+  if (page === "brands") return WA.pageBrands();
+  if (page === "countries") return WA.pageCountries();
+  if (page === "apps") return WA.pageApps();
+  if (page === "daily") return WA.pageDaily();
+  if (page === "brand") return WA.pageBrand();
+  if (page === "country") return WA.pageCountry();
+  if (page === "app") return WA.pageApp();
+};
+
 WA.ready = async () => {
   await WA.loadCore();
   WA.renderHeader(document.body.dataset.page);

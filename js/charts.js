@@ -1,9 +1,12 @@
 WA.chartTheme = () => {
   const light = document.documentElement.getAttribute("data-theme") === "light";
+  const cs = getComputedStyle(document.documentElement);
+  const text = (cs.getPropertyValue("--text-primary") || "").trim() || (light ? "#121226" : "#ffffff");
+  const tick = (cs.getPropertyValue("--text-secondary") || "").trim() || (light ? "#5b5d72" : "#c8c8d4");
   return {
-    grid: light ? "rgba(18,18,38,.08)" : "rgba(255,255,255,.08)",
-    tick: light ? "#5b5d72" : "#a0a0b0",
-    text: light ? "#121226" : "#ffffff"
+    grid: light ? "rgba(18,18,38,.1)" : "rgba(255,255,255,.1)",
+    tick,
+    text
   };
 };
 
@@ -23,7 +26,35 @@ WA.baseChart = () => {
   return t;
 };
 
+WA.legendInkPlugin = {
+  id: "waLegendInk",
+  beforeDraw(chart) {
+    const ink = WA.chartTheme().text;
+    const labels = chart.options.plugins?.legend?.labels;
+    if (labels) labels.color = ink;
+    const legend = chart.legend;
+    if (legend?.legendItems) {
+      legend.legendItems.forEach((item) => {
+        item.fontColor = ink;
+        item.color = ink;
+      });
+    }
+  }
+};
+
+WA.destroyCharts = () => {
+  document.querySelectorAll("canvas").forEach((el) => {
+    const ch = typeof Chart !== "undefined" && Chart.getChart(el);
+    if (ch) ch.destroy();
+  });
+  document.querySelectorAll(".chart-pct").forEach((el) => el.remove());
+};
+
 WA.paintCharts = () => {
+  if (WA.redrawPage) {
+    WA.redrawPage();
+    return;
+  }
   const t = WA.baseChart();
   document.querySelectorAll("canvas").forEach((el) => {
     const ch = Chart.getChart(el);
@@ -39,8 +70,17 @@ WA.paintCharts = () => {
     Object.values(scales).forEach((s) => {
       if (s?.grid) s.grid.color = t.grid;
     });
-    if (ch.options.plugins?.legend?.labels) ch.options.plugins.legend.labels.color = t.text;
-    ch.update("none");
+    if (ch.options.plugins?.legend?.labels) {
+      ch.options.plugins.legend.labels.color = t.text;
+      if (typeof ch.options.plugins.legend.labels.generateLabels === "function") {
+        const prev = ch.options.plugins.legend.labels.generateLabels;
+        ch.options.plugins.legend.labels.generateLabels = (c) => {
+          const items = prev(c) || [];
+          return items.map((item) => ({ ...item, color: t.text, fontColor: t.text }));
+        };
+      }
+    }
+    ch.update();
   });
 };
 
@@ -218,7 +258,7 @@ WA.barCompare = (id, labels, leads, sales) => {
         y: { ticks: { color: t.tick }, grid: { color: t.grid }, grace: "12%" }
       }
     },
-    plugins: [WA.barValuePlugin]
+    plugins: [WA.barValuePlugin, WA.legendInkPlugin]
   });
   const host = document.getElementById(id)?.closest(".chart-card") || document.getElementById(id)?.parentElement;
   if (host) {
@@ -292,8 +332,9 @@ WA.piePctPlugin = {
       const pos = arc.tooltipPosition();
       const text = p.toFixed(1) + "%";
       const ink = WA.chartTheme();
+      const light = document.documentElement.getAttribute("data-theme") === "light";
       ctx.lineWidth = 3;
-      ctx.strokeStyle = ink.text === "#ffffff" ? "rgba(7,7,18,.55)" : "rgba(255,255,255,.75)";
+      ctx.strokeStyle = light ? "rgba(255,255,255,.8)" : "rgba(7,7,18,.6)";
       ctx.strokeText(text, pos.x, pos.y);
       ctx.fillStyle = ink.text;
       ctx.fillText(text, pos.x, pos.y);
@@ -321,7 +362,7 @@ WA.pie = (id, labels, data) => {
         legend: {
           position: "right",
           labels: {
-            color: t.text,
+            color: () => WA.chartTheme().text,
             font: { size: 12, weight: "600" },
             padding: 10,
             generateLabels: (c) => (c.data.labels || []).map((label, i) => {
@@ -348,7 +389,7 @@ WA.pie = (id, labels, data) => {
         }
       }
     },
-    plugins: [WA.piePctPlugin]
+    plugins: [WA.piePctPlugin, WA.legendInkPlugin]
   });
   WA.pctLegend(id, labels, values);
   return chart;

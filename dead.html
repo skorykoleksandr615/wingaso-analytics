@@ -3,78 +3,78 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Бренд — WingAso Analytics</title>
-  <meta name="description" content="Карточка бренда: выручка по дням, страны и приложения.">
-  <link rel="canonical" href="https://wingasoanalytics.online/brand.html">
+  <title>Пустые — WingAso Analytics</title>
+  <meta name="description" content="Бренды и приложения без депозитов, регистраций или инсталов за период.">
+  <link rel="canonical" href="https://wingasoanalytics.online/dead.html">
   <link rel="icon" href="/assets/favicon.png?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css?v=21">
 </head>
-<body data-page="brand">
+<body data-page="dead">
   <header class="app-header" id="app-header"></header>
   <main class="wrap" id="content">
     <div class="page-head">
       <div>
-        <p class="muted" id="back-link"><a href="/brands.html">← Бренды</a></p>
-        <h1 id="title">Бренд</h1>
-        <p class="muted" id="lead"></p>
+        <h1>Пустые</h1>
+        <p class="muted" id="updated"></p>
+        <p class="muted">Бренды и прилы без толку за выбранный период. По умолчанию — без депозитов, но был траф. Период сверху.</p>
       </div>
     </div>
-    <section class="grid-2">
-      <article class="card chart-card">
-        <h2>Выручка по дням</h2>
-        <div class="chart-wrap"><canvas id="rev-line"></canvas></div>
-      </article>
-      <article class="card chart-card">
-        <h2>Страны</h2>
-        <div class="chart-wrap"><canvas id="country-bar"></canvas></div>
-      </article>
-    </section>
-    <article class="card table-card desktop-only" style="margin-top:12px">
-      <h2>По странам</h2>
-      <div class="table-scroll">
-        <table class="data" id="country-table">
-          <thead>
-            <tr>
-              <th data-key="country" data-dir="asc">Страна</th>
-              <th class="num" data-key="leads">Регистрации</th>
-              <th class="num" data-key="installs">Инсталы</th>
-              <th class="num" data-key="sales">Депозиты</th>
-              <th class="num" data-key="revenue">Выручка</th>
-              <th class="num" data-key="rate">Конверсия</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+    <section class="kpi-grid" id="kpis"></section>
+    <div class="toolbar">
+      <input class="search" id="dead-search" placeholder="Поиск бренда или пакета">
+      <div class="filter-chips" id="zero-filters">
+        <label class="chip"><input type="checkbox" data-zero="noSale" checked> Без депозитов</label>
+        <label class="chip"><input type="checkbox" data-zero="noLead"> Без регистраций</label>
+        <label class="chip"><input type="checkbox" data-zero="noInst"> Без инсталов</label>
+        <label class="chip"><input type="checkbox" data-zero="hasTraffic" checked> Был траф</label>
       </div>
-    </article>
-    <div class="cards-mobile" id="brand-country-cards"></div>
-    <p class="note" id="apps-note" hidden></p>
-    <article class="card table-card desktop-only" style="margin-top:12px">
-      <h2 id="apps-head">Приложения</h2>
+    </div>
+    <article class="card table-card desktop-only">
+      <h2 id="dead-brands-title">Бренды</h2>
       <div class="table-scroll">
-        <table class="data" id="app-table">
+        <table class="data" id="dead-brand-table">
           <thead>
             <tr>
-              <th data-key="package" data-dir="asc">Пакет</th>
+              <th data-key="brand" data-dir="asc">Бренд</th>
               <th class="num" data-key="leads">Регистрации</th>
               <th class="num" data-key="installs">Инсталы</th>
               <th class="num" data-key="sales">Депозиты</th>
               <th class="num" data-key="revenue">Выручка</th>
               <th class="num" data-key="countries">Страны</th>
-              <th data-key="first_date" data-dir="asc">Первый</th>
-              <th data-key="last_date">Последний</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
+      <div class="pager" id="dead-brand-pager"></div>
     </article>
-    <div class="cards-mobile" id="brand-app-cards"></div>
+    <div class="cards-mobile" id="dead-brand-cards"></div>
+    <article class="card table-card desktop-only" style="margin-top:12px">
+      <h2 id="dead-apps-title">Приложения</h2>
+      <div class="table-scroll">
+        <table class="data" id="dead-app-table">
+          <thead>
+            <tr>
+              <th data-key="package" data-dir="asc">Пакет</th>
+              <th data-key="brand" data-dir="asc">Бренд</th>
+              <th class="num" data-key="leads">Регистрации</th>
+              <th class="num" data-key="installs">Инсталы</th>
+              <th class="num" data-key="sales">Депозиты</th>
+              <th class="num" data-key="revenue">Выручка</th>
+              <th class="num" data-key="countries">Страны</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pager" id="dead-app-pager"></div>
+    </article>
+    <div class="cards-mobile" id="dead-app-cards"></div>
   </main>
-  <footer class="footer">WingAso Analytics</footer>
+  <footer class="footer">WingAso Analytics · Пустые за выбранный период</footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="/js/data.js?v=11"></script>
   <script src="/js/ui.js?v=8"></script>

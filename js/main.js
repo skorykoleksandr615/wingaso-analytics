@@ -11,6 +11,7 @@ WA.redrawPage = async () => {
   if (page === "brand") return WA.pageBrand();
   if (page === "country") return WA.pageCountry();
   if (page === "app") return WA.pageApp();
+  if (page === "dead") return WA.pageDead();
 };
 
 WA.ready = async () => {
@@ -25,6 +26,7 @@ WA.ready = async () => {
   if (page === "brand") return WA.pageBrand();
   if (page === "country") return WA.pageCountry();
   if (page === "app") return WA.pageApp();
+  if (page === "dead") return WA.pageDead();
 };
 
 WA.currentBounds = () => {
@@ -100,7 +102,7 @@ WA.pageBrands = async () => {
   const draw = () => {
     const q = WA.tableState.query.toLowerCase();
     const minRev = Number(WA.tableState.extra.minRev || 0);
-    let rows = all.filter((r) => r.brand.toLowerCase().includes(q) && r.revenue >= minRev);
+    let rows = all.filter((r) => r.brand.toLowerCase().includes(q) && r.revenue >= minRev && WA.matchZero(r, WA.tableState.extra));
     rows = WA.sortRows(rows, WA.tableState.sortKey, WA.tableState.sortDir);
     const page = WA.paginate(rows);
     const body = document.querySelector("#brand-table tbody");
@@ -131,8 +133,9 @@ WA.pageBrands = async () => {
     }, { once: true });
   };
   WA.bindSort(document.getElementById("brand-table"), draw);
-  document.getElementById("brand-search").addEventListener("input", (e) => { WA.tableState.query = e.target.value; WA.tableState.page = 1; draw(); });
-  document.getElementById("min-rev").addEventListener("input", (e) => { WA.tableState.extra.minRev = e.target.value; WA.tableState.page = 1; draw(); });
+  WA.bindZeroFilters(document.getElementById("zero-filters"), WA.tableState.extra, draw);
+  document.getElementById("brand-search").oninput = (e) => { WA.tableState.query = e.target.value; WA.tableState.page = 1; draw(); };
+  document.getElementById("min-rev").oninput = (e) => { WA.tableState.extra.minRev = e.target.value; WA.tableState.page = 1; draw(); };
   draw();
 };
 
@@ -160,37 +163,48 @@ WA.pageBrand = async () => {
   document.getElementById("lead").textContent = `${WA.money2(sum.revenue)} · ${WA.num(sum.leads)} рег. · ${WA.instTxt(sum)} инст. · ${WA.num(sum.sales)} деп. · ${WA.pctTxt(sum.sales, sum.leads)} · ${b.from} → ${b.to}`;
   const byDay = WA.groupBy(rows, (r) => r.date).sort((a, c) => a.key.localeCompare(c.key));
   WA.lineChart("rev-line", byDay.map((x) => x.key.slice(5)), byDay.map((x) => x.revenue), "Выручка");
-  const byCountry = WA.groupBy(rows, (r) => r.country).sort((a, c) => c.revenue - a.revenue);
-  WA.hBar("country-bar", byCountry.slice(0, 12).map((x) => x.key), byCountry.slice(0, 12).map((x) => x.revenue));
-  const countryBody = document.querySelector("#country-table tbody");
-  if (countryBody) {
-    countryBody.innerHTML = byCountry.map((x) => `
-      <tr data-href="${WA.href("/brand.html", { b: name, c: x.key })}">
-        <td><span class="pill">${WA.flag(x.key)} ${x.key}</span> ${WA.countryName(x.key)}</td>
-        <td class="num">${WA.num(x.leads)}</td>
-        <td class="num">${WA.instTxt(x)}</td>
-        <td class="num">${WA.num(x.sales)}</td>
-        <td class="num">${WA.money2(x.revenue)}</td>
-        <td class="num">${WA.pctTxt(x.sales, x.leads)}</td>
-      </tr>`).join("");
-    countryBody.querySelectorAll("tr").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
-  }
-  const countryCards = document.getElementById("brand-country-cards");
-  if (countryCards) {
-    countryCards.innerHTML = byCountry.map((x) => `
-      <a class="card mobile-card" href="${WA.href("/brand.html", { b: name, c: x.key })}">
-        <strong>${WA.flag(x.key)} ${x.key} · ${WA.countryName(x.key)}</strong>
-        <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(x.leads)} / ${WA.instTxt(x)} / ${WA.num(x.sales)}</span></div>
-        <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
-      </a>`).join("");
-  }
+  const byCountry = WA.groupBy(rows, (r) => r.country).map((x) => ({
+    country: x.key, leads: x.leads, installs: x.installs, hasInstalls: x.hasInstalls,
+    sales: x.sales, revenue: x.revenue, rate: WA.pct(x.sales, x.leads)
+  }));
+  WA.hBar("country-bar", [...byCountry].sort((a, c) => c.revenue - a.revenue).slice(0, 12).map((x) => x.country), [...byCountry].sort((a, c) => c.revenue - a.revenue).slice(0, 12).map((x) => x.revenue));
+  const countryState = { key: "revenue", dir: "desc" };
+  const drawCountries = () => {
+    const list = WA.sortRows(byCountry, countryState.key, countryState.dir);
+    WA.markSort(document.getElementById("country-table"), countryState.key, countryState.dir);
+    const countryBody = document.querySelector("#country-table tbody");
+    if (countryBody) {
+      countryBody.innerHTML = list.map((x) => `
+        <tr data-href="${WA.href("/brand.html", { b: name, c: x.country })}">
+          <td><span class="pill">${WA.flag(x.country)} ${x.country}</span> ${WA.countryName(x.country)}</td>
+          <td class="num">${WA.num(x.leads)}</td>
+          <td class="num">${WA.instTxt(x)}</td>
+          <td class="num">${WA.num(x.sales)}</td>
+          <td class="num">${WA.money2(x.revenue)}</td>
+          <td class="num">${WA.pctTxt(x.sales, x.leads)}</td>
+        </tr>`).join("");
+      countryBody.querySelectorAll("tr").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
+    }
+    const countryCards = document.getElementById("brand-country-cards");
+    if (countryCards) {
+      countryCards.innerHTML = list.map((x) => `
+        <a class="card mobile-card" href="${WA.href("/brand.html", { b: name, c: x.country })}">
+          <strong>${WA.flag(x.country)} ${x.country} · ${WA.countryName(x.country)}</strong>
+          <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(x.leads)} / ${WA.instTxt(x)} / ${WA.num(x.sales)}</span></div>
+          <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
+        </a>`).join("");
+    }
+  };
+  WA.bindTableSort(document.getElementById("country-table"), countryState, drawCountries);
+  drawCountries();
 
   const appTable = document.querySelector("#app-table tbody");
   const appCards = document.getElementById("brand-app-cards");
   const appHead = document.getElementById("apps-head");
   const note = document.getElementById("apps-note");
-
-  const apps = WA.brandApps(name).sort((a, c) => c.revenue - a.revenue);
+  const appState = { key: "revenue", dir: "desc" };
+  let appRows = [];
+  let appCountry = "";
   if (country) {
     const scoped = WA.appsForBrandCountry(name, country, b.from, b.to, rows, sum);
     if (appHead) appHead.textContent = `Приложения в ${country}`;
@@ -198,24 +212,27 @@ WA.pageBrand = async () => {
       note.hidden = !scoped.note;
       if (scoped.note) note.textContent = scoped.note;
     }
-    appTable.innerHTML = scoped.apps.length
-      ? scoped.apps.map((a) => WA.appRowHtml(a, country)).join("")
-      : `<tr><td colspan="8" class="empty">Нет приложений с трафом в ${country} за этот период.</td></tr>`;
+    appRows = scoped.apps;
+    appCountry = country;
+  } else {
+    if (note) note.hidden = true;
+    appRows = WA.brandApps(name);
+  }
+  const drawApps = () => {
+    const list = WA.sortRows(appRows, appState.key, appState.dir);
+    WA.markSort(document.getElementById("app-table"), appState.key, appState.dir);
+    appTable.innerHTML = list.length
+      ? list.map((a) => WA.appRowHtml(a, appCountry)).join("")
+      : `<tr><td colspan="8" class="empty">${appCountry ? `Нет приложений с трафом в ${appCountry} за этот период.` : "Нет приложений по этому бренду."}</td></tr>`;
     if (appCards) {
-      appCards.innerHTML = scoped.apps.length
-        ? scoped.apps.map((a) => WA.appCardHtml(a, country)).join("")
-        : `<article class="card mobile-card"><span class="muted">Нет приложений с трафом в ${country} за этот период.</span></article>`;
+      appCards.innerHTML = list.length
+        ? list.map((a) => WA.appCardHtml(a, appCountry)).join("")
+        : `<article class="card mobile-card"><span class="muted">${appCountry ? `Нет приложений с трафом в ${appCountry} за этот период.` : "Нет приложений по этому бренду."}</span></article>`;
     }
     WA.bindRowHrefs(appTable);
-    return;
-  }
-
-  if (note) note.hidden = true;
-  appTable.innerHTML = apps.length ? apps.map((a) => WA.appRowHtml(a)).join("") : `<tr><td colspan="8" class="empty">Нет приложений по этому бренду.</td></tr>`;
-  if (appCards) {
-    appCards.innerHTML = apps.length ? apps.map((a) => WA.appCardHtml(a)).join("") : `<article class="card mobile-card"><span class="muted">Нет приложений по этому бренду.</span></article>`;
-  }
-  WA.bindRowHrefs(appTable);
+  };
+  WA.bindTableSort(document.getElementById("app-table"), appState, drawApps);
+  drawApps();
 };
 
 WA.appsForBrandCountry = (brand, country, from, to, rows, sum) => {
@@ -344,7 +361,7 @@ WA.pageCountries = async () => {
     const region = WA.tableState.extra.region || "";
     let rows = grouped.filter((r) => {
       const hit = r.country.toLowerCase().includes(q) || r.name.toLowerCase().includes(q);
-      return hit && (!region || r.region === region);
+      return hit && (!region || r.region === region) && WA.matchZero(r, WA.tableState.extra);
     });
     rows = WA.sortRows(rows, WA.tableState.sortKey, WA.tableState.sortDir);
     const page = WA.paginate(rows);
@@ -374,8 +391,9 @@ WA.pageCountries = async () => {
     }, { once: true });
   };
   WA.bindSort(document.getElementById("country-table"), draw);
-  document.getElementById("country-search").addEventListener("input", (e) => { WA.tableState.query = e.target.value; WA.tableState.page = 1; draw(); });
-  document.getElementById("region-filter").addEventListener("change", (e) => { WA.tableState.extra.region = e.target.value; WA.tableState.page = 1; draw(); });
+  WA.bindZeroFilters(document.getElementById("zero-filters"), WA.tableState.extra, draw);
+  document.getElementById("country-search").oninput = (e) => { WA.tableState.query = e.target.value; WA.tableState.page = 1; draw(); };
+  document.getElementById("region-filter").onchange = (e) => { WA.tableState.extra.region = e.target.value; WA.tableState.page = 1; draw(); };
   draw();
 };
 
@@ -393,46 +411,74 @@ WA.pageCountry = async () => {
   document.getElementById("lead").textContent = `${WA.money2(sum.revenue)} · ${WA.num(sum.leads)} рег. · ${WA.instTxt(sum)} инст. · ${WA.num(sum.sales)} деп. · ${WA.pctTxt(sum.sales, sum.leads)} · ${b.from} → ${b.to}`;
   const byDay = WA.groupBy(rows, (r) => r.date).sort((a, c) => a.key.localeCompare(c.key));
   WA.lineChart("rev-line", byDay.map((x) => x.key.slice(5)), byDay.map((x) => x.revenue), "Выручка");
-  const byBrand = WA.groupBy(rows, (r) => r.brand).sort((a, c) => c.revenue - a.revenue);
-  WA.hBar("brand-bar", byBrand.slice(0, 12).map((x) => x.key), byBrand.slice(0, 12).map((x) => x.revenue));
-  document.querySelector("#brand-table tbody").innerHTML = byBrand.map((x) => `
-    <tr data-href="${WA.href("/brand.html", { b: x.key, c: code })}">
-      <td>${x.key}</td>
-      <td class="pkg-cell">${WA.pkgListHtml(x.key, code, b.from, b.to)}</td>
-      <td class="num">${WA.num(x.leads)}</td>
-      <td class="num">${WA.instTxt(x)}</td>
-      <td class="num">${WA.num(x.sales)}</td>
-      <td class="num">${WA.money2(x.revenue)}</td>
-      <td class="num">${WA.pctTxt(x.sales, x.leads)}</td>
-    </tr>`).join("");
-  WA.bindRowHrefs(document.querySelector("#brand-table tbody"));
-  const brandCards = document.getElementById("country-brand-cards");
-  if (brandCards) {
-    brandCards.innerHTML = byBrand.map((x) => `
-      <a class="card mobile-card" href="${WA.href("/brand.html", { b: x.key, c: code })}">
-        <strong>${x.key}</strong>
-        <div class="pkg-list">${WA.brandAppsIn(x.key, b.from, b.to).map((a) => `<span class="mono">${a.package}</span>`).join("")}</div>
-        <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
-        <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(x.leads)} / ${WA.instTxt(x)} / ${WA.num(x.sales)}</span></div>
-        <div class="row"><span class="muted">Конверсия</span><span class="mono">${WA.pctTxt(x.sales, x.leads)}</span></div>
-      </a>`).join("");
-  }
+  const byBrand = WA.groupBy(rows, (r) => r.brand).map((x) => ({
+    brand: x.key, leads: x.leads, installs: x.installs, hasInstalls: x.hasInstalls,
+    sales: x.sales, revenue: x.revenue, rate: WA.pct(x.sales, x.leads)
+  }));
+  const topBrand = [...byBrand].sort((a, c) => c.revenue - a.revenue);
+  WA.hBar("brand-bar", topBrand.slice(0, 12).map((x) => x.brand), topBrand.slice(0, 12).map((x) => x.revenue));
+  const brandState = { key: "revenue", dir: "desc" };
+  const drawBrands = () => {
+    const list = WA.sortRows(byBrand, brandState.key, brandState.dir);
+    WA.markSort(document.getElementById("brand-table"), brandState.key, brandState.dir);
+    document.querySelector("#brand-table tbody").innerHTML = list.map((x) => `
+      <tr data-href="${WA.href("/brand.html", { b: x.brand, c: code })}">
+        <td>${x.brand}</td>
+        <td class="pkg-cell">${WA.pkgListHtml(x.brand, code, b.from, b.to)}</td>
+        <td class="num">${WA.num(x.leads)}</td>
+        <td class="num">${WA.instTxt(x)}</td>
+        <td class="num">${WA.num(x.sales)}</td>
+        <td class="num">${WA.money2(x.revenue)}</td>
+        <td class="num">${WA.pctTxt(x.sales, x.leads)}</td>
+      </tr>`).join("");
+    WA.bindRowHrefs(document.querySelector("#brand-table tbody"));
+    const brandCards = document.getElementById("country-brand-cards");
+    if (brandCards) {
+      brandCards.innerHTML = list.map((x) => `
+        <a class="card mobile-card" href="${WA.href("/brand.html", { b: x.brand, c: code })}">
+          <strong>${x.brand}</strong>
+          <div class="pkg-list">${WA.brandAppsIn(x.brand, b.from, b.to).map((a) => `<span class="mono">${a.package}</span>`).join("")}</div>
+          <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
+          <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(x.leads)} / ${WA.instTxt(x)} / ${WA.num(x.sales)}</span></div>
+          <div class="row"><span class="muted">Конверсия</span><span class="mono">${WA.pctTxt(x.sales, x.leads)}</span></div>
+        </a>`).join("");
+    }
+  };
+  WA.bindTableSort(document.getElementById("brand-table"), brandState, drawBrands);
+  drawBrands();
 };
 
 WA.pageApps = async () => {
+  await WA.loadAgg();
   const b = WA.currentBounds();
-  document.getElementById("updated").textContent = `${b.from} → ${b.to} · цифры приложений за всё время, фильтр по активности`;
+  document.getElementById("updated").textContent = `${b.from} → ${b.to} · цифры прил за выбранный период`;
   WA.resetTable("revenue");
-  const all = WA.apps.map((a) => ({ ...a, rate: WA.pct(a.sales, a.leads) }));
+  const grouped = WA.groupBy(WA.aggIn(b.from, b.to).filter((r) => r.package), (r) => r.package);
+  const meta = new Map(WA.apps.map((a) => [a.package, a]));
+  const all = grouped.map((g) => {
+    const a = meta.get(g.key) || {};
+    return {
+      package: g.key,
+      brand: a.brand || [...g.brands][0] || "",
+      leads: g.leads,
+      sales: g.sales,
+      revenue: g.revenue,
+      installs: g.installs,
+      hasInstalls: g.hasInstalls,
+      countries: g.countries.size,
+      first_date: a.first_date || "",
+      last_date: a.last_date || "",
+      rate: WA.pct(g.sales, g.leads)
+    };
+  });
   const draw = () => {
     const q = WA.tableState.query.toLowerCase();
     const active = WA.tableState.extra.active === "7";
     const from7 = WA.bounds("7").from;
     let rows = all.filter((a) => {
       const hit = a.package.toLowerCase().includes(q) || a.brand.toLowerCase().includes(q);
-      const overlap = (!a.last_date || a.last_date >= b.from) && (!a.first_date || a.first_date <= b.to);
       const last = a.last_date || "";
-      return hit && overlap && (!active || last >= from7);
+      return hit && (!active || last >= from7) && WA.matchZero(a, WA.tableState.extra);
     });
     rows = WA.sortRows(rows, WA.tableState.sortKey, WA.tableState.sortDir);
     const page = WA.paginate(rows);
@@ -462,8 +508,9 @@ WA.pageApps = async () => {
     }, { once: true });
   };
   WA.bindSort(document.getElementById("app-table"), draw);
-  document.getElementById("app-search").addEventListener("input", (e) => { WA.tableState.query = e.target.value; WA.tableState.page = 1; draw(); });
-  document.getElementById("active-filter").addEventListener("change", (e) => { WA.tableState.extra.active = e.target.value; WA.tableState.page = 1; draw(); });
+  WA.bindZeroFilters(document.getElementById("zero-filters"), WA.tableState.extra, draw);
+  document.getElementById("app-search").oninput = (e) => { WA.tableState.query = e.target.value; WA.tableState.page = 1; draw(); };
+  document.getElementById("active-filter").onchange = (e) => { WA.tableState.extra.active = e.target.value; WA.tableState.page = 1; draw(); };
   draw();
 };
 
@@ -501,7 +548,10 @@ WA.pageApp = async () => {
     ].map(([label, value]) => `<article class="card kpi"><div class="label">${label}</div><div class="value">${value}</div></article>`).join("");
   }
 
-  const grouped = WA.groupBy(found.rows, (r) => r.country).sort((a, c) => c.revenue - a.revenue);
+  const grouped = WA.groupBy(found.rows, (r) => r.country).map((x) => ({
+    country: x.key, leads: x.leads, installs: x.installs, hasInstalls: x.hasInstalls,
+    sales: x.sales, revenue: x.revenue, rate: WA.pct(x.sales, x.leads)
+  }));
   const byDay = WA.groupBy(found.rows, (r) => r.date).sort((a, c) => a.key.localeCompare(c.key));
   const note = document.getElementById("geo-note");
   if (found.mode === "package" || found.mode === "brand" || found.mode === "unique") {
@@ -514,7 +564,8 @@ WA.pageApp = async () => {
           : "Страны по дням, когда эта прила была единственной активной у бренда. Дни с несколькими пакетами не входят.";
     }
     WA.lineChart("rev-line", byDay.map((x) => x.key.slice(5)), byDay.map((x) => x.revenue), "Выручка");
-    WA.hBar("country-bar", grouped.slice(0, 12).map((x) => x.key), grouped.slice(0, 12).map((x) => x.revenue));
+    const topGeo = [...grouped].sort((a, c) => c.revenue - a.revenue);
+    WA.hBar("country-bar", topGeo.slice(0, 12).map((x) => x.country), topGeo.slice(0, 12).map((x) => x.revenue));
   } else {
     if (note) {
       note.hidden = false;
@@ -531,25 +582,32 @@ WA.pageApp = async () => {
     if (cards) cards.innerHTML = `<article class="card mobile-card"><span class="muted">Нет разбивки по странам для этой прилы.</span></article>`;
     return;
   }
-  body.innerHTML = grouped.map((x) => `
-    <tr data-href="${WA.href("/country.html", { c: x.key })}">
-      <td><span class="pill">${WA.flag(x.key)} ${x.key}</span> ${WA.countryName(x.key)}</td>
-      <td class="num">${WA.num(x.leads)}</td>
-      <td class="num">${WA.instTxt(x)}</td>
-      <td class="num">${WA.num(x.sales)}</td>
-      <td class="num">${WA.money2(x.revenue)}</td>
-      <td class="num">${WA.pctTxt(x.sales, x.leads)}</td>
-    </tr>`).join("");
-  body.querySelectorAll("tr").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
-  const cards = document.getElementById("app-country-cards");
-  if (cards) {
-    cards.innerHTML = grouped.map((x) => `
-      <a class="card mobile-card" href="${WA.href("/country.html", { c: x.key })}">
-        <strong>${WA.flag(x.key)} ${x.key} · ${WA.countryName(x.key)}</strong>
-        <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(x.leads)} / ${WA.instTxt(x)} / ${WA.num(x.sales)}</span></div>
-        <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
-      </a>`).join("");
-  }
+  const geoState = { key: "revenue", dir: "desc" };
+  const drawGeo = () => {
+    const list = WA.sortRows(grouped, geoState.key, geoState.dir);
+    WA.markSort(document.getElementById("country-table"), geoState.key, geoState.dir);
+    body.innerHTML = list.map((x) => `
+      <tr data-href="${WA.href("/country.html", { c: x.country })}">
+        <td><span class="pill">${WA.flag(x.country)} ${x.country}</span> ${WA.countryName(x.country)}</td>
+        <td class="num">${WA.num(x.leads)}</td>
+        <td class="num">${WA.instTxt(x)}</td>
+        <td class="num">${WA.num(x.sales)}</td>
+        <td class="num">${WA.money2(x.revenue)}</td>
+        <td class="num">${WA.pctTxt(x.sales, x.leads)}</td>
+      </tr>`).join("");
+    body.querySelectorAll("tr").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
+    const cards = document.getElementById("app-country-cards");
+    if (cards) {
+      cards.innerHTML = list.map((x) => `
+        <a class="card mobile-card" href="${WA.href("/country.html", { c: x.country })}">
+          <strong>${WA.flag(x.country)} ${x.country} · ${WA.countryName(x.country)}</strong>
+          <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(x.leads)} / ${WA.instTxt(x)} / ${WA.num(x.sales)}</span></div>
+          <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
+        </a>`).join("");
+    }
+  };
+  WA.bindTableSort(document.getElementById("country-table"), geoState, drawGeo);
+  drawGeo();
 };
 
 WA.pageDaily = async () => {
@@ -564,27 +622,34 @@ WA.pageDaily = async () => {
     const change = prev ? WA.delta(d.revenue, prev.revenue) : 0;
     return { ...d, topBrand: top?.key || "—", change, alert: Math.abs(change) >= 35 };
   });
-  document.querySelector("#daily-table tbody").innerHTML = dayRows.map((d) => `
-    <tr class="${d.alert ? "alert" : ""}">
-      <td>${d.date}</td>
-      <td class="num">${WA.num(d.leads)}</td>
-      <td class="num">${WA.hasNum(d.installs) ? WA.num(d.installs) : "—"}</td>
-      <td class="num">${WA.num(d.sales)}</td>
-      <td class="num">${WA.money2(d.revenue)}</td>
-      <td>${d.topBrand}</td>
-      <td class="num ${d.change >= 0 ? "delta up" : "delta down"}">${d.change >= 0 ? "↑" : "↓"} ${Math.abs(d.change).toFixed(1)}%</td>
-    </tr>`).join("");
-  const dailyCards = document.getElementById("daily-cards");
-  if (dailyCards) {
-    dailyCards.innerHTML = dayRows.map((d) => `
-      <article class="card mobile-card ${d.alert ? "alert" : ""}">
-        <strong>${d.date}</strong>
-        <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(d.revenue)}</span></div>
-        <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(d.leads)} / ${WA.hasNum(d.installs) ? WA.num(d.installs) : "—"} / ${WA.num(d.sales)}</span></div>
-        <div class="row"><span class="muted">Топ-бренд</span><span>${d.topBrand}</span></div>
-        <div class="row"><span class="muted">к пред. дню</span><span class="mono ${d.change >= 0 ? "delta up" : "delta down"}">${d.change >= 0 ? "↑" : "↓"} ${Math.abs(d.change).toFixed(1)}%</span></div>
-      </article>`).join("");
-  }
+  const dayState = { key: "date", dir: "desc" };
+  const drawDays = () => {
+    const list = WA.sortRows(dayRows, dayState.key, dayState.dir);
+    WA.markSort(document.getElementById("daily-table"), dayState.key, dayState.dir);
+    document.querySelector("#daily-table tbody").innerHTML = list.map((d) => `
+      <tr class="${d.alert ? "alert" : ""}">
+        <td>${d.date}</td>
+        <td class="num">${WA.num(d.leads)}</td>
+        <td class="num">${WA.hasNum(d.installs) ? WA.num(d.installs) : "—"}</td>
+        <td class="num">${WA.num(d.sales)}</td>
+        <td class="num">${WA.money2(d.revenue)}</td>
+        <td>${d.topBrand}</td>
+        <td class="num ${d.change >= 0 ? "delta up" : "delta down"}">${d.change >= 0 ? "↑" : "↓"} ${Math.abs(d.change).toFixed(1)}%</td>
+      </tr>`).join("");
+    const dailyCards = document.getElementById("daily-cards");
+    if (dailyCards) {
+      dailyCards.innerHTML = list.map((d) => `
+        <article class="card mobile-card ${d.alert ? "alert" : ""}">
+          <strong>${d.date}</strong>
+          <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(d.revenue)}</span></div>
+          <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(d.leads)} / ${WA.hasNum(d.installs) ? WA.num(d.installs) : "—"} / ${WA.num(d.sales)}</span></div>
+          <div class="row"><span class="muted">Топ-бренд</span><span>${d.topBrand}</span></div>
+          <div class="row"><span class="muted">к пред. дню</span><span class="mono ${d.change >= 0 ? "delta up" : "delta down"}">${d.change >= 0 ? "↑" : "↓"} ${Math.abs(d.change).toFixed(1)}%</span></div>
+        </article>`).join("");
+    }
+  };
+  WA.bindTableSort(document.getElementById("daily-table"), dayState, drawDays);
+  drawDays();
   const labels = days.map((d) => d.date.slice(5));
   const top5 = WA.groupBy(agg, (r) => r.brand).sort((a, c) => c.revenue - a.revenue).slice(0, 5);
   const datasets = top5.map((brand) => ({
@@ -592,6 +657,139 @@ WA.pageDaily = async () => {
     data: days.map((d) => brand.dates[d.date] || 0)
   }));
   WA.stackedArea("stack-area", labels, datasets);
+};
+
+WA.pageDead = async () => {
+  await WA.loadAgg();
+  const b = WA.currentBounds();
+  document.getElementById("updated").textContent = `${b.from} → ${b.to}`;
+  WA.resetTable("installs");
+  const extra = WA.tableState.extra;
+  extra.noSale = true;
+  extra.hasTraffic = true;
+  const scoped = WA.aggIn(b.from, b.to);
+  const brands = WA.groupBy(scoped, (r) => r.brand).map((x) => ({
+    brand: x.key,
+    leads: x.leads,
+    installs: x.installs,
+    hasInstalls: x.hasInstalls,
+    sales: x.sales,
+    revenue: x.revenue,
+    countries: x.countries.size,
+    rate: WA.pct(x.sales, x.leads)
+  }));
+  const meta = new Map(WA.apps.map((a) => [a.package, a]));
+  const apps = WA.groupBy(scoped.filter((r) => r.package), (r) => r.package).map((g) => {
+    const a = meta.get(g.key) || {};
+    return {
+      package: g.key,
+      brand: a.brand || [...g.brands][0] || "",
+      leads: g.leads,
+      installs: g.installs,
+      hasInstalls: g.hasInstalls,
+      sales: g.sales,
+      revenue: g.revenue,
+      countries: g.countries.size
+    };
+  });
+  const keep = (row) => {
+    if (!WA.matchZero(row, extra)) return false;
+    if (extra.hasTraffic && !((Number(row.installs) || 0) > 0 || (Number(row.leads) || 0) > 0)) return false;
+    const q = (WA.tableState.query || "").toLowerCase();
+    if (!q) return true;
+    return String(row.brand || "").toLowerCase().includes(q) || String(row.package || "").toLowerCase().includes(q);
+  };
+  const brandState = { key: "installs", dir: "desc" };
+  const appState = { key: "installs", dir: "desc" };
+  let appPage = 1;
+  const draw = () => {
+    const deadBrands = WA.sortRows(brands.filter(keep), brandState.key, brandState.dir);
+    const deadApps = WA.sortRows(apps.filter(keep), appState.key, appState.dir);
+    document.getElementById("dead-brands-title").textContent = `Бренды · ${deadBrands.length}`;
+    document.getElementById("dead-apps-title").textContent = `Приложения · ${deadApps.length}`;
+    const kpis = document.getElementById("kpis");
+    if (kpis) {
+      const inst = deadBrands.reduce((s, r) => s + (Number(r.installs) || 0), 0);
+      const leads = deadBrands.reduce((s, r) => s + (Number(r.leads) || 0), 0);
+      kpis.innerHTML = [
+        ["Пустых брендов", WA.num(deadBrands.length)],
+        ["Пустых прил", WA.num(deadApps.length)],
+        ["Их инсталы", WA.num(inst)],
+        ["Их регистрации", WA.num(leads)],
+        ["Период", `${WA.fmtDay(b.from)} — ${WA.fmtDay(b.to)}`],
+        ["Фильтр", [extra.noSale && "без деп", extra.noLead && "без рег", extra.noInst && "без инст", extra.hasTraffic && "был траф"].filter(Boolean).join(" · ") || "все"]
+      ].map(([label, value]) => `<article class="card kpi"><div class="label">${label}</div><div class="value">${value}</div></article>`).join("");
+    }
+    WA.tableState.sortKey = brandState.key;
+    WA.tableState.sortDir = brandState.dir;
+    const brandPage = WA.paginate(deadBrands);
+    WA.markSort(document.getElementById("dead-brand-table"), brandState.key, brandState.dir);
+    document.querySelector("#dead-brand-table tbody").innerHTML = brandPage.rows.length
+      ? brandPage.rows.map((r) => `
+        <tr data-href="${WA.href("/brand.html", { b: r.brand })}">
+          <td>${r.brand}</td>
+          <td class="num">${WA.num(r.leads)}</td>
+          <td class="num">${WA.instTxt(r)}</td>
+          <td class="num">${WA.num(r.sales)}</td>
+          <td class="num">${WA.money2(r.revenue)}</td>
+          <td class="num">${WA.num(r.countries)}</td>
+        </tr>`).join("")
+      : `<tr><td colspan="6" class="empty">Нет брендов под этот фильтр.</td></tr>`;
+    document.querySelectorAll("#dead-brand-table tbody tr[data-href]").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
+    document.getElementById("dead-brand-cards").innerHTML = brandPage.rows.map((r) => `
+      <a class="card mobile-card" href="${WA.href("/brand.html", { b: r.brand })}">
+        <strong>${r.brand}</strong>
+        <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(r.leads)} / ${WA.instTxt(r)} / ${WA.num(r.sales)}</span></div>
+      </a>`).join("");
+    WA.renderPager(document.getElementById("dead-brand-pager"), brandPage, () => { draw(); });
+
+    const per = WA.tableState.perPage;
+    const appPages = Math.max(1, Math.ceil(deadApps.length / per));
+    if (appPage > appPages) appPage = appPages;
+    const appSlice = deadApps.slice((appPage - 1) * per, appPage * per);
+    WA.markSort(document.getElementById("dead-app-table"), appState.key, appState.dir);
+    document.querySelector("#dead-app-table tbody").innerHTML = appSlice.length
+      ? appSlice.map((a) => `
+        <tr data-href="${WA.href("/app.html", { p: a.package })}">
+          <td class="mono">${a.package}</td>
+          <td>${a.brand}</td>
+          <td class="num">${WA.num(a.leads)}</td>
+          <td class="num">${WA.instTxt(a)}</td>
+          <td class="num">${WA.num(a.sales)}</td>
+          <td class="num">${WA.money2(a.revenue)}</td>
+          <td class="num">${WA.num(a.countries)}</td>
+        </tr>`).join("")
+      : `<tr><td colspan="7" class="empty">Нет прил под этот фильтр.</td></tr>`;
+    document.querySelectorAll("#dead-app-table tbody tr[data-href]").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
+    document.getElementById("dead-app-cards").innerHTML = appSlice.map((a) => `
+      <a class="card mobile-card" href="${WA.href("/app.html", { p: a.package })}">
+        <strong class="mono">${a.package}</strong>
+        <div class="row"><span class="muted">Бренд</span><span>${a.brand}</span></div>
+        <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(a.leads)} / ${WA.instTxt(a)} / ${WA.num(a.sales)}</span></div>
+      </a>`).join("");
+    const appPager = document.getElementById("dead-app-pager");
+    WA.renderPager(appPager, { rows: appSlice, total: deadApps.length, pages: appPages }, () => {});
+    appPager.querySelector("[data-act=prev]").onclick = () => { if (appPage > 1) { appPage--; draw(); } };
+    appPager.querySelector("[data-act=next]").onclick = () => { if (appPage < appPages) { appPage++; draw(); } };
+    appPager.querySelector("[data-act=csv]").onclick = () => {
+      WA.csv("wingaso-dead-apps.csv", ["Пакет","Бренд","Регистрации","Инсталы","Депозиты","Выручка","Страны"], deadApps.map((a) => [a.package, a.brand, a.leads, a.installs, a.sales, a.revenue.toFixed(2), a.countries]));
+    };
+    document.getElementById("dead-brand-pager").oncsv = null;
+    document.getElementById("dead-brand-pager").addEventListener("csv", () => {
+      WA.csv("wingaso-dead-brands.csv", ["Бренд","Регистрации","Инсталы","Депозиты","Выручка","Страны"], deadBrands.map((r) => [r.brand, r.leads, r.installs, r.sales, r.revenue.toFixed(2), r.countries]));
+    }, { once: true });
+  };
+  extra.noSale = true;
+  extra.hasTraffic = true;
+  WA.bindTableSort(document.getElementById("dead-brand-table"), brandState, () => { WA.tableState.page = 1; draw(); });
+  WA.bindTableSort(document.getElementById("dead-app-table"), appState, () => { appPage = 1; draw(); });
+  WA.bindZeroFilters(document.getElementById("zero-filters"), extra, () => { WA.tableState.page = 1; appPage = 1; draw(); });
+  extra.noSale = document.querySelector("[data-zero=noSale]")?.checked;
+  extra.noLead = document.querySelector("[data-zero=noLead]")?.checked;
+  extra.noInst = document.querySelector("[data-zero=noInst]")?.checked;
+  extra.hasTraffic = document.querySelector("[data-zero=hasTraffic]")?.checked;
+  document.getElementById("dead-search").oninput = (e) => { WA.tableState.query = e.target.value; WA.tableState.page = 1; appPage = 1; draw(); };
+  draw();
 };
 
 document.addEventListener("DOMContentLoaded", () => {

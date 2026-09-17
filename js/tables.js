@@ -34,18 +34,62 @@ WA.paginate = (rows) => {
   };
 };
 
-WA.bindSort = (table, onChange) => {
+WA.markSort = (table, key, dir) => {
+  if (!table) return;
   table.querySelectorAll("th[data-key]").forEach((th) => {
-    th.addEventListener("click", () => {
-      const key = th.dataset.key;
-      if (WA.tableState.sortKey === key) WA.tableState.sortDir = WA.tableState.sortDir === "desc" ? "asc" : "desc";
+    const on = th.dataset.key === key;
+    th.classList.toggle("sorted", on);
+    th.dataset.sort = on ? dir : "";
+  });
+};
+
+WA.bindTableSort = (table, state, onChange) => {
+  if (!table) return;
+  table.querySelectorAll("th[data-key]").forEach((th) => {
+    th.onclick = () => {
+      if (state.key === th.dataset.key) state.dir = state.dir === "desc" ? "asc" : "desc";
       else {
-        WA.tableState.sortKey = key;
-        WA.tableState.sortDir = th.dataset.dir || "desc";
+        state.key = th.dataset.key;
+        state.dir = th.dataset.dir || "desc";
       }
+      onChange();
+    };
+  });
+  WA.markSort(table, state.key, state.dir);
+};
+
+WA.bindSort = (table, onChange) => {
+  const state = {
+    get key() { return WA.tableState.sortKey; },
+    set key(v) { WA.tableState.sortKey = v; },
+    get dir() { return WA.tableState.sortDir; },
+    set dir(v) { WA.tableState.sortDir = v; }
+  };
+  WA.bindTableSort(table, state, () => {
+    WA.tableState.page = 1;
+    WA.markSort(table, WA.tableState.sortKey, WA.tableState.sortDir);
+    onChange();
+  });
+};
+
+WA.matchZero = (row, extra = {}) => {
+  const checks = [];
+  if (extra.noInst) checks.push((Number(row.installs) || 0) === 0);
+  if (extra.noLead) checks.push((Number(row.leads) || 0) === 0);
+  if (extra.noSale) checks.push((Number(row.sales) || 0) === 0);
+  if (!checks.length) return true;
+  return checks.every(Boolean);
+};
+
+WA.bindZeroFilters = (root, extra, onChange) => {
+  if (!root) return;
+  root.querySelectorAll("[data-zero]").forEach((el) => {
+    extra[el.dataset.zero] = el.checked;
+    el.onchange = () => {
+      extra[el.dataset.zero] = el.checked;
       WA.tableState.page = 1;
       onChange();
-    });
+    };
   });
 };
 

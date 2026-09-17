@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20">
+  <link rel="stylesheet" href="/css/style.css?v=21">
 </head>
 <body data-page="daily">
   <header class="app-header" id="app-header"></header>
@@ -30,13 +30,13 @@
         <table class="data" id="daily-table">
           <thead>
             <tr>
-              <th>Дата</th>
-              <th class="num">Регистрации</th>
-              <th class="num">Инсталы</th>
-              <th class="num">Депозиты</th>
-              <th class="num">Выручка</th>
-              <th>Топ-бренд</th>
-              <th class="num">к предыдущему дню</th>
+              <th data-key="date" data-dir="asc">Дата</th>
+              <th class="num" data-key="leads">Регистрации</th>
+              <th class="num" data-key="installs">Инсталы</th>
+              <th class="num" data-key="sales">Депозиты</th>
+              <th class="num" data-key="revenue">Выручка</th>
+              <th data-key="topBrand" data-dir="asc">Топ-бренд</th>
+              <th class="num" data-key="change">к предыдущему дню</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -48,9 +48,9 @@
   <footer class="footer">WingAso Analytics · Резкие скачки выделены</footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="/js/data.js?v=11"></script>
-  <script src="/js/ui.js?v=7"></script>
+  <script src="/js/ui.js?v=8"></script>
   <script src="/js/charts.js?v=10"></script>
-  <script src="/js/tables.js?v=2"></script>
-  <script src="/js/main.js?v=11"></script>
+  <script src="/js/tables.js?v=3"></script>
+  <script src="/js/main.js?v=12"></script>
 </body>
 </html>

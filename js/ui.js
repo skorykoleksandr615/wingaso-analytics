@@ -16,6 +16,7 @@ WA.renderHeader = (active) => {
       <a href="${WA.href("/brands.html")}" class="${active === "brands" ? "active" : ""}">Бренды</a>
       <a href="${WA.href("/countries.html")}" class="${active === "countries" ? "active" : ""}">Страны</a>
       <a href="${WA.href("/apps.html")}" class="${active === "apps" ? "active" : ""}">Приложения</a>
+      <a href="${WA.href("/dead.html")}" class="${active === "dead" ? "active" : ""}">Пустые</a>
       <a href="${WA.href("/daily.html")}" class="${active === "daily" ? "active" : ""}">По дням</a>
     </nav>
     <div class="header-tools">

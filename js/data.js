@@ -255,29 +255,41 @@ WA.regionOf = (code) => {
   return "Other";
 };
 
+WA.splitKey = (key) => {
+  const i = String(key).indexOf("\t");
+  return i < 0 ? [key, ""] : [key.slice(0, i), key.slice(i + 1)];
+};
+
 WA.appsInPeriod = (from, to) => {
   const scoped = WA.aggIn(from, to).filter((r) => r.package);
-  const meta = new Map(WA.apps.map((a) => [a.package, a]));
-  return WA.groupBy(scoped, (r) => r.package).map((g) => {
-    const a = meta.get(g.key) || {};
+  return WA.groupBy(scoped, (r) => `${r.package}\t${r.brand}`).map((g) => {
+    const [pkg, brand] = WA.splitKey(g.key);
     const dates = Object.keys(g.dates).sort();
     return {
-      package: g.key,
-      brand: WA.clean(a.brand || [...g.brands][0] || ""),
+      package: pkg,
+      brand,
       leads: g.leads,
       sales: g.sales,
       revenue: g.revenue,
       installs: g.installs,
       hasInstalls: g.hasInstalls,
       countries: g.countries.size,
-      first_date: dates[0] || a.first_date || "",
-      last_date: dates[dates.length - 1] || a.last_date || "",
+      first_date: dates[0] || "",
+      last_date: dates[dates.length - 1] || "",
       rate: WA.pct(g.sales, g.leads)
     };
   });
 };
 
-WA.brandApps = (brand) => WA.apps.filter((a) => a.brand === WA.clean(brand));
+WA.pkgsFor = (from, to, extra = {}) => {
+  let rows = WA.aggIn(from, to).filter((r) => r.package);
+  if (extra.brand) rows = rows.filter((r) => r.brand === WA.clean(extra.brand));
+  if (extra.country) rows = rows.filter((r) => r.country === extra.country);
+  if (extra.package) rows = rows.filter((r) => r.package === extra.package);
+  return WA.groupBy(rows, (r) => r.package).sort((a, c) => c.revenue - a.revenue);
+};
+
+WA.brandApps = (brand) => WA.appsInPeriod(WA.meta?.period?.from || "1970-01-01", WA.meta?.period?.to || "9999-12-31").filter((a) => a.brand === WA.clean(brand));
 
 WA.appActiveIn = (app, from, to) => {
   const a = app.first_date || "1970-01-01";
@@ -286,12 +298,12 @@ WA.appActiveIn = (app, from, to) => {
 };
 
 WA.brandAppsIn = (brand, from, to) =>
-  WA.brandApps(brand).filter((a) => WA.appActiveIn(a, from, to)).sort((x, y) => (y.revenue || 0) - (x.revenue || 0));
+  WA.appsInPeriod(from, to).filter((a) => a.brand === WA.clean(brand)).sort((x, y) => (y.revenue || 0) - (x.revenue || 0));
 
 WA.pkgListHtml = (brand, country, from, to) => {
-  const apps = (from && to) ? WA.brandAppsIn(brand, from, to) : WA.brandApps(brand).sort((a, c) => (c.revenue || 0) - (a.revenue || 0));
+  const apps = WA.pkgsFor(from, to, { brand, country });
   if (!apps.length) return "—";
-  return `<div class="pkg-list">${apps.map((a) => `<a class="pkg-link" href="${WA.href("/app.html", { p: a.package, c: country || "" })}">${WA.esc(a.package)}</a>`).join("")}</div>`;
+  return `<div class="pkg-list">${apps.map((a) => `<a class="pkg-link" href="${WA.href("/app.html", { p: a.key, b: brand, c: country || "" })}">${WA.esc(a.key)}</a>`).join("")}</div>`;
 };
 
 WA.bindRowHrefs = (root) => {
@@ -303,31 +315,14 @@ WA.bindRowHrefs = (root) => {
   });
 };
 
-WA.uniqueAppDays = (pkg, from, to) => {
-  const app = WA.apps.find((a) => a.package === pkg);
-  if (!app) return [];
-  const siblings = WA.brandApps(app.brand);
-  const scoped = WA.aggIn(from, to).filter((r) => r.brand === app.brand);
-  const byPackage = scoped.filter((r) => r.package && r.package === pkg);
-  if (byPackage.length) return byPackage;
-  if (siblings.length === 1) return scoped;
-  return scoped.filter((r) => {
-    const active = siblings.filter((s) => WA.appActiveIn(s, r.date, r.date));
-    return active.length === 1 && active[0].package === pkg;
-  });
-};
-
-WA.appCountryRows = (pkg, from, to) => {
-  const app = WA.apps.find((a) => a.package === pkg);
-  if (!app) return { rows: [], mode: "missing" };
-  const scoped = WA.aggIn(from, to);
-  const byPackage = scoped.filter((r) => r.package && r.package === pkg);
-  if (byPackage.length) return { rows: byPackage, mode: "package", app };
-  const siblings = WA.brandApps(app.brand);
-  if (siblings.length === 1) {
-    return { rows: scoped.filter((r) => r.brand === app.brand), mode: "brand", app };
-  }
-  const unique = WA.uniqueAppDays(pkg, from, to);
-  if (unique.length) return { rows: unique, mode: "unique", app };
-  return { rows: [], mode: "none", app };
+WA.appCountryRows = (pkg, from, to, brand) => {
+  let rows = WA.aggIn(from, to).filter((r) => r.package === pkg);
+  if (brand) rows = rows.filter((r) => r.brand === WA.clean(brand));
+  const brands = [...new Set(rows.map((r) => r.brand).filter(Boolean))];
+  return {
+    rows,
+    mode: rows.length ? "package" : "none",
+    brands,
+    app: { package: pkg, brand: brand || brands[0] || "", brands }
+  };
 };

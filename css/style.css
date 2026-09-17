@@ -54,15 +54,15 @@ body:not(.login-body) { position: relative; isolation: isolate; }
 .dash-eagle {
   position: absolute;
   inset: 0;
-  opacity: .22;
+  opacity: .7;
 }
 .dash-eagle img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: 72%;
   object-fit: cover;
-  object-position: 52% 8%;
-  filter: saturate(.75) contrast(1.08);
+  object-position: 52% 6%;
+  filter: saturate(.85) contrast(1.1);
   transform-origin: 50% 40%;
   animation: eagleHover 14s ease-in-out infinite alternate;
 }
@@ -71,8 +71,8 @@ body:not(.login-body) { position: relative; isolation: isolate; }
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(7, 7, 18, .42), rgba(7, 7, 18, .82) 48%, #070712 100%),
-    radial-gradient(circle at 78% 12%, rgba(201, 163, 106, .22), transparent 38%);
+    linear-gradient(180deg, rgba(7, 7, 18, .18) 0%, rgba(7, 7, 18, .62) 42%, #070712 78%),
+    radial-gradient(circle at 78% 10%, rgba(201, 163, 106, .28), transparent 36%);
   animation: glowPulse 7s ease-in-out infinite;
 }
 .dash-fx .dash-embers {

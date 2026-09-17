@@ -165,9 +165,7 @@ WA.bounds = (range, from, to) => {
   };
   if (range === "yesterday") {
     const cal = WA.yesterdayYmd();
-    const hasCal = (WA.daily || []).some((d) => d.date === cal);
-    const day = hasCal ? cal : end;
-    return { from: day, to: day };
+    return { from: cal, to: cal };
   }
   if (range === "7") return { from: shift(7), to: end };
   if (range === "30") return { from: shift(30), to: end };

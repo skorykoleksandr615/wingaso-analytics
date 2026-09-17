@@ -43,7 +43,7 @@ WA.renderHeader = (active) => {
   fromEl.value = range === "custom" && from ? from : b.from;
   toEl.value = range === "custom" && to ? to : b.to;
   const min = WA.meta?.period?.from || "";
-  const max = WA.meta?.period?.to || "";
+  const max = range === "yesterday" ? b.to : (WA.meta?.period?.to || "");
   if (min) { fromEl.min = min; toEl.min = min; }
   if (max) { fromEl.max = max; toEl.max = max; }
   sel.addEventListener("change", () => {

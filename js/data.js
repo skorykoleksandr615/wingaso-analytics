@@ -248,6 +248,28 @@ WA.regionOf = (code) => {
   return "Other";
 };
 
+WA.appsInPeriod = (from, to) => {
+  const scoped = WA.aggIn(from, to).filter((r) => r.package);
+  const meta = new Map(WA.apps.map((a) => [a.package, a]));
+  return WA.groupBy(scoped, (r) => r.package).map((g) => {
+    const a = meta.get(g.key) || {};
+    const dates = Object.keys(g.dates).sort();
+    return {
+      package: g.key,
+      brand: WA.clean(a.brand || [...g.brands][0] || ""),
+      leads: g.leads,
+      sales: g.sales,
+      revenue: g.revenue,
+      installs: g.installs,
+      hasInstalls: g.hasInstalls,
+      countries: g.countries.size,
+      first_date: dates[0] || a.first_date || "",
+      last_date: dates[dates.length - 1] || a.last_date || "",
+      rate: WA.pct(g.sales, g.leads)
+    };
+  });
+};
+
 WA.brandApps = (brand) => WA.apps.filter((a) => a.brand === WA.clean(brand));
 
 WA.appActiveIn = (app, from, to) => {

@@ -216,7 +216,7 @@ WA.pageBrand = async () => {
     appCountry = country;
   } else {
     if (note) note.hidden = true;
-    appRows = WA.brandApps(name);
+    appRows = WA.appsInPeriod(b.from, b.to).filter((a) => a.brand === name);
   }
   const drawApps = () => {
     const list = WA.sortRows(appRows, appState.key, appState.dir);
@@ -453,24 +453,7 @@ WA.pageApps = async () => {
   const b = WA.currentBounds();
   document.getElementById("updated").textContent = `${b.from} → ${b.to} · цифры прил за выбранный период`;
   WA.resetTable("revenue");
-  const grouped = WA.groupBy(WA.aggIn(b.from, b.to).filter((r) => r.package), (r) => r.package);
-  const meta = new Map(WA.apps.map((a) => [a.package, a]));
-  const all = grouped.map((g) => {
-    const a = meta.get(g.key) || {};
-    return {
-      package: g.key,
-      brand: a.brand || [...g.brands][0] || "",
-      leads: g.leads,
-      sales: g.sales,
-      revenue: g.revenue,
-      installs: g.installs,
-      hasInstalls: g.hasInstalls,
-      countries: g.countries.size,
-      first_date: a.first_date || "",
-      last_date: a.last_date || "",
-      rate: WA.pct(g.sales, g.leads)
-    };
-  });
+  const all = WA.appsInPeriod(b.from, b.to);
   const draw = () => {
     const q = WA.tableState.query.toLowerCase();
     const active = WA.tableState.extra.active === "7";
@@ -535,16 +518,27 @@ WA.pageApp = async () => {
     document.getElementById("lead").textContent = "Пакет не найден в выгрузке.";
     return;
   }
-  document.getElementById("lead").textContent = `${app.brand} · пакет за всё время: ${WA.money2(app.revenue)} · ${WA.num(app.leads)} рег. · ${WA.instTxt(app)} инст. · ${WA.num(app.sales)} деп. · графики ${b.from} → ${b.to}`;
+  const period = found.rows.reduce((acc, r) => {
+    acc.leads += r.leads || 0;
+    acc.sales += r.sales || 0;
+    acc.revenue += r.revenue || 0;
+    if (r.hasInstalls || r.installs != null) {
+      acc.hasInstalls = true;
+      acc.installs += Number(r.installs) || 0;
+    }
+    if (r.country) acc.geo.add(r.country);
+    return acc;
+  }, { leads: 0, sales: 0, revenue: 0, installs: 0, hasInstalls: false, geo: new Set() });
+  document.getElementById("lead").textContent = `${app.brand} · ${WA.money2(period.revenue)} · ${WA.num(period.leads)} рег. · ${WA.instTxt(period)} инст. · ${WA.num(period.sales)} деп. · ${b.from} → ${b.to}`;
   const kpis = document.getElementById("kpis");
   if (kpis) {
     kpis.innerHTML = [
-      ["Регистрации", WA.num(app.leads)],
-      ["Инсталы", WA.instTxt(app)],
-      ["Депозиты", WA.num(app.sales)],
-      ["Выручка", WA.money2(app.revenue)],
-      ["Конверсия", WA.pctTxt(app.sales, app.leads)],
-      ["Страны (всего)", WA.num(app.countries)]
+      ["Регистрации", WA.num(period.leads)],
+      ["Инсталы", WA.instTxt(period)],
+      ["Депозиты", WA.num(period.sales)],
+      ["Выручка", WA.money2(period.revenue)],
+      ["Конверсия", WA.pctTxt(period.sales, period.leads)],
+      ["Страны", WA.num(period.geo.size)]
     ].map(([label, value]) => `<article class="card kpi"><div class="label">${label}</div><div class="value">${value}</div></article>`).join("");
   }
 
@@ -700,20 +694,7 @@ WA.pageDead = async () => {
     countries: x.countries.size,
     rate: WA.pct(x.sales, x.leads)
   }));
-  const meta = new Map(WA.apps.map((a) => [a.package, a]));
-  const apps = WA.groupBy(scoped.filter((r) => r.package), (r) => r.package).map((g) => {
-    const a = meta.get(g.key) || {};
-    return {
-      package: g.key,
-      brand: a.brand || [...g.brands][0] || "",
-      leads: g.leads,
-      installs: g.installs,
-      hasInstalls: g.hasInstalls,
-      sales: g.sales,
-      revenue: g.revenue,
-      countries: g.countries.size
-    };
-  });
+  const apps = WA.appsInPeriod(b.from, b.to);
   const keep = (row) => {
     if ((Number(row.sales) || 0) > 0 || (Number(row.revenue) || 0) > 0) return false;
     if (!WA.matchZero(row, extra)) return false;

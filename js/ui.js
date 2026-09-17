@@ -73,10 +73,7 @@ WA.renderAtmosphere = () => {
   const fx = document.createElement("div");
   fx.className = "dash-fx";
   fx.setAttribute("aria-hidden", "true");
-  fx.innerHTML = `
-    <div class="dash-eagle"><img src="/assets/eagle-battle.jpg" alt=""></div>
-    <div class="dash-embers"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="dash-sheen"></div>`;
+  fx.innerHTML = `<div class="dash-embers"><i></i><i></i><i></i><i></i><i></i><i></i></div>`;
   document.body.prepend(fx);
 };
 

@@ -276,6 +276,20 @@ WA.bindRowHrefs = (root) => {
   });
 };
 
+WA.uniqueAppDays = (pkg, from, to) => {
+  const app = WA.apps.find((a) => a.package === pkg);
+  if (!app) return [];
+  const siblings = WA.brandApps(app.brand);
+  const scoped = WA.aggIn(from, to).filter((r) => r.brand === app.brand);
+  const byPackage = scoped.filter((r) => r.package && r.package === pkg);
+  if (byPackage.length) return byPackage;
+  if (siblings.length === 1) return scoped;
+  return scoped.filter((r) => {
+    const active = siblings.filter((s) => WA.appActiveIn(s, r.date, r.date));
+    return active.length === 1 && active[0].package === pkg;
+  });
+};
+
 WA.appCountryRows = (pkg, from, to) => {
   const app = WA.apps.find((a) => a.package === pkg);
   if (!app) return { rows: [], mode: "missing" };
@@ -286,5 +300,7 @@ WA.appCountryRows = (pkg, from, to) => {
   if (siblings.length === 1) {
     return { rows: scoped.filter((r) => r.brand === app.brand), mode: "brand", app };
   }
+  const unique = WA.uniqueAppDays(pkg, from, to);
+  if (unique.length) return { rows: unique, mode: "unique", app };
   return { rows: [], mode: "none", app };
 };

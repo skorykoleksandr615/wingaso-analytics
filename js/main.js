@@ -241,6 +241,26 @@ WA.appsForBrandCountry = (brand, country, from, to, rows, sum) => {
       }]
     };
   }
+  const attributed = active.map((a) => {
+    const geo = WA.groupBy(WA.uniqueAppDays(a.package, from, to).filter((r) => r.country === country), (r) => r.country)[0];
+    if (!geo) return { ...a, unknownGeo: true, countries: "н/д" };
+    return {
+      ...a,
+      leads: geo.leads,
+      sales: geo.sales,
+      revenue: geo.revenue,
+      installs: geo.installs,
+      hasInstalls: geo.hasInstalls,
+      countries: 1,
+      unknownGeo: false
+    };
+  }).filter((a) => !a.unknownGeo);
+  if (attributed.length) {
+    return {
+      note: `Цифры ${country} по дням, когда пакет был единственным активным у бренда.`,
+      apps: attributed.sort((a, c) => c.revenue - a.revenue)
+    };
+  }
   return {
     note: `Несколько прил активны в периоде, в выгрузке нет прила × страна — цифры ${country} не раскладываю по пакетам.`,
     apps: active.map((a) => ({ ...a, unknownGeo: true, countries: "н/д" }))
@@ -440,7 +460,10 @@ WA.pageApp = async () => {
   const pkg = params.get("p") || "";
   const countryHint = (params.get("c") || "").toUpperCase();
   const b = WA.currentBounds();
-  const found = WA.appCountryRows(pkg, b.from, b.to);
+  let found = WA.appCountryRows(pkg, b.from, b.to);
+  if (countryHint && found.rows.length) {
+    found = { ...found, rows: found.rows.filter((r) => r.country === countryHint) };
+  }
   const app = found.app || WA.apps.find((a) => a.package === pkg);
   const back = app
     ? `<a href="${WA.href("/brand.html", { b: app.brand, c: countryHint })}">← ${app.brand}</a>`
@@ -468,12 +491,15 @@ WA.pageApp = async () => {
   const grouped = WA.groupBy(found.rows, (r) => r.country).sort((a, c) => c.revenue - a.revenue);
   const byDay = WA.groupBy(found.rows, (r) => r.date).sort((a, c) => a.key.localeCompare(c.key));
   const note = document.getElementById("geo-note");
-  if (found.mode === "package") {
-    if (note) { note.hidden = false; note.textContent = "Разбивка по этой приле из выгрузки."; }
-    WA.lineChart("rev-line", byDay.map((x) => x.key.slice(5)), byDay.map((x) => x.revenue), "Выручка");
-    WA.hBar("country-bar", grouped.slice(0, 12).map((x) => x.key), grouped.slice(0, 12).map((x) => x.revenue));
-  } else if (found.mode === "brand") {
-    if (note) { note.hidden = false; note.textContent = "У бренда одно приложение — страны взяты с уровня бренда."; }
+  if (found.mode === "package" || found.mode === "brand" || found.mode === "unique") {
+    if (note) {
+      note.hidden = false;
+      note.textContent = found.mode === "package"
+        ? "Разбивка по этой приле из выгрузки."
+        : found.mode === "brand"
+          ? "У бренда одно приложение — страны взяты с уровня бренда."
+          : "Страны по дням, когда эта прила была единственной активной у бренда. Дни с несколькими пакетами не входят.";
+    }
     WA.lineChart("rev-line", byDay.map((x) => x.key.slice(5)), byDay.map((x) => x.revenue), "Выручка");
     WA.hBar("country-bar", grouped.slice(0, 12).map((x) => x.key), grouped.slice(0, 12).map((x) => x.revenue));
   } else {

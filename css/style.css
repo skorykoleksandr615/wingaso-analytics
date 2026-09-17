@@ -260,7 +260,7 @@ img { max-width: 100%; }
 
 .grid-2 { display: grid; grid-template-columns: 1.2fr .8fr; gap: 12px; }
 .grid-2.equal, .grid-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.chart-card { padding: 16px; min-height: 320px; }
+.chart-card { padding: 16px; min-height: 320px; overflow: visible; }
 .chart-card h2, .table-card h2 { margin: 0 0 12px; font-size: 16px; }
 .chart-head {
   display: flex;
@@ -271,7 +271,7 @@ img { max-width: 100%; }
 }
 .chart-head h2 { margin: 0; }
 .chart-head .field { min-width: 110px; }
-.chart-wrap { position: relative; height: 260px; }
+.chart-wrap { position: relative; height: 260px; overflow: visible; }
 
 .toolbar {
   display: flex;

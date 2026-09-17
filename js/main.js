@@ -654,7 +654,8 @@ WA.pageDaily = async () => {
   const ranked = WA.groupBy(agg, (r) => r.brand).sort((a, c) => c.revenue - a.revenue);
   const topSel = document.getElementById("top-n");
   const drawStack = () => {
-    const n = Math.max(3, Math.min(20, Number(topSel?.value || localStorage.getItem("wa-top-n") || 5)));
+    const raw = Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5);
+    const n = Math.max(3, Math.min(20, raw || 5));
     if (topSel) topSel.value = String(n);
     localStorage.setItem("wa-top-n", String(n));
     const title = document.getElementById("stack-title");
@@ -676,6 +677,7 @@ WA.pageDaily = async () => {
   if (topSel) {
     topSel.value = localStorage.getItem("wa-top-n") || "5";
     topSel.onchange = drawStack;
+    topSel.oninput = drawStack;
   }
   drawStack();
 };

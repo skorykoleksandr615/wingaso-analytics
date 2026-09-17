@@ -283,7 +283,9 @@ WA.hBar = (id, labels, data) => {
   if (prev) prev.destroy();
   const wrap = el.parentElement;
   if (wrap && wrap.classList.contains("chart-wrap")) {
-    wrap.style.height = Math.max(240, labels.length * 34 + 24) + "px";
+    const h = Math.max(260, labels.length * 40 + 28);
+    wrap.style.height = h + "px";
+    wrap.style.minHeight = h + "px";
   }
   const t = WA.baseChart();
   const values = data.map((v) => Number(v) || 0);
@@ -314,12 +316,13 @@ WA.hBar = (id, labels, data) => {
       },
       scales: {
         x: { ticks: { color: t.tick }, grid: { color: t.grid }, grace: "18%" },
-        y: { ticks: { color: t.text }, grid: { display: false } }
+        y: { ticks: { color: t.text, autoSkip: false, maxTicksLimit: 30 }, grid: { display: false } }
       }
     },
     plugins: [WA.barPctPlugin]
   });
   WA.pctLegend(id, labels, values);
+  requestAnimationFrame(() => chart.resize());
   return chart;
 };
 

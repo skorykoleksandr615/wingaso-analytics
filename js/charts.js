@@ -101,7 +101,7 @@ WA.pctLegend = (canvasId, labels, values) => {
   }
   el.innerHTML = labels.map((label, i) => {
     const p = ((Number(values[i]) || 0) / total * 100).toFixed(1);
-    return `<span style="--i:${i}"><b>${label}</b> ${p}%</span>`;
+    return `<span style="--i:${i}"><b>${WA.esc(label)}</b> ${p}%</span>`;
   }).join("");
 };
 
@@ -270,7 +270,7 @@ WA.barCompare = (id, labels, leads, sales) => {
       document.getElementById(id).parentElement.after(el);
     }
     el.innerHTML = labels.length <= 16
-      ? labels.map((label, i) => `<span style="--i:${i}"><b>${label}</b> ${WA.num(leads[i])} рег. · ${WA.num(sales[i])} деп.</span>`).join("")
+      ? labels.map((label, i) => `<span style="--i:${i}"><b>${WA.esc(label)}</b> ${WA.num(leads[i])} рег. · ${WA.num(sales[i])} деп.</span>`).join("")
       : "";
   }
   return chart;

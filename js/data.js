@@ -34,6 +34,13 @@ WA.REGIONS = {
 };
 
 WA.clean = (s) => String(s || "").replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, "").trim();
+WA.esc = (s) => String(s ?? "").replace(/[&<>"'`]/g, (c) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "`": "&#96;"
+}[c]));
+WA.isPkg = (p) => {
+  const s = WA.clean(p);
+  return s.length >= 3 && s.length <= 180 && /^[A-Za-z][A-Za-z0-9_]{0,40}(\.[A-Za-z][A-Za-z0-9_]{0,40}){1,12}$/.test(s);
+};
 
 WA.money = (n) => "$" + (Number(n) || 0).toLocaleString("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 WA.money2 = (n) => "$" + (Number(n) || 0).toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -111,7 +118,7 @@ WA.loadCore = async () => {
   }
   WA.brands = [...map.values()].sort((a, b) => b.revenue - a.revenue);
   WA.countries = countries;
-  WA.apps = apps.map((a) => ({ ...a, brand: WA.clean(a.brand) }));
+  WA.apps = apps.filter((a) => WA.isPkg(a.package)).map((a) => ({ ...a, brand: WA.clean(a.brand), package: WA.clean(a.package) }));
   WA.daily = daily.slice().sort((a, b) => a.date.localeCompare(b.date));
   return WA;
 };
@@ -119,7 +126,7 @@ WA.loadCore = async () => {
 WA.loadAgg = async () => {
   if (WA.aggregated) return WA.aggregated;
   const rows = await fetchJson("/data/aggregated.json");
-  WA.aggregated = rows.map((r) => ({
+  WA.aggregated = rows.filter((r) => !r.package || WA.isPkg(r.package)).map((r) => ({
     ...r,
     brand: WA.clean(r.brand),
     package: r.package ? WA.clean(r.package) : "",
@@ -284,7 +291,7 @@ WA.brandAppsIn = (brand, from, to) =>
 WA.pkgListHtml = (brand, country, from, to) => {
   const apps = (from && to) ? WA.brandAppsIn(brand, from, to) : WA.brandApps(brand).sort((a, c) => (c.revenue || 0) - (a.revenue || 0));
   if (!apps.length) return "—";
-  return `<div class="pkg-list">${apps.map((a) => `<a class="pkg-link" href="${WA.href("/app.html", { p: a.package, c: country || "" })}">${a.package}</a>`).join("")}</div>`;
+  return `<div class="pkg-list">${apps.map((a) => `<a class="pkg-link" href="${WA.href("/app.html", { p: a.package, c: country || "" })}">${WA.esc(a.package)}</a>`).join("")}</div>`;
 };
 
 WA.bindRowHrefs = (root) => {

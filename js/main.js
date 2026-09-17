@@ -301,7 +301,7 @@ WA.appRowHtml = (a, country) => {
   const nd = a.unknownGeo;
   return `
   <tr data-href="${WA.href("/app.html", { p: a.package, c: country || "" })}">
-    <td class="mono">${a.package}</td>
+    <td class="mono">${WA.esc(a.package)}</td>
     <td class="num">${nd ? "н/д" : a.countries}</td>
     <td class="num">${nd ? "н/д" : WA.instTxt(a)}</td>
     <td class="num">${nd ? "н/д" : WA.num(a.leads)}</td>
@@ -316,7 +316,7 @@ WA.appCardHtml = (a, country) => {
   const nd = a.unknownGeo;
   return `
   <a class="card mobile-card" href="${WA.href("/app.html", { p: a.package, c: country || "" })}">
-    <strong class="mono">${a.package}</strong>
+    <strong class="mono">${WA.esc(a.package)}</strong>
     <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${nd ? "н/д" : `${WA.num(a.leads)} / ${WA.instTxt(a)} / ${WA.num(a.sales)}`}</span></div>
     <div class="row"><span class="muted">Выручка</span><span class="mono">${nd ? "н/д" : WA.money2(a.revenue)}</span></div>
     <div class="row"><span class="muted">Страны</span><span class="mono">${nd ? "н/д" : a.countries}</span></div>
@@ -437,7 +437,7 @@ WA.pageCountry = async () => {
       brandCards.innerHTML = list.map((x) => `
         <a class="card mobile-card" href="${WA.href("/brand.html", { b: x.brand, c: code })}">
           <strong>${x.brand}</strong>
-          <div class="pkg-list">${WA.brandAppsIn(x.brand, b.from, b.to).map((a) => `<span class="mono">${a.package}</span>`).join("")}</div>
+          <div class="pkg-list">${WA.brandAppsIn(x.brand, b.from, b.to).map((a) => `<span class="mono">${WA.esc(a.package)}</span>`).join("")}</div>
           <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
           <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(x.leads)} / ${WA.instTxt(x)} / ${WA.num(x.sales)}</span></div>
           <div class="row"><span class="muted">Конверсия</span><span class="mono">${WA.pctTxt(x.sales, x.leads)}</span></div>
@@ -467,7 +467,7 @@ WA.pageApps = async () => {
     const page = WA.paginate(rows);
     document.querySelector("#app-table tbody").innerHTML = page.rows.map((a) => `
       <tr data-href="${WA.href("/app.html", { p: a.package })}">
-        <td class="mono">${a.package}</td>
+        <td class="mono">${WA.esc(a.package)}</td>
         <td><a href="${WA.href("/brand.html", { b: a.brand })}">${a.brand}</a></td>
         <td class="num">${a.countries}</td>
         <td class="num">${WA.instTxt(a)}</td>
@@ -479,7 +479,7 @@ WA.pageApps = async () => {
       </tr>`).join("");
     document.getElementById("app-cards").innerHTML = page.rows.map((a) => `
       <a class="card mobile-card" href="${WA.href("/app.html", { p: a.package })}">
-        <strong class="mono">${a.package}</strong>
+        <strong class="mono">${WA.esc(a.package)}</strong>
         <div class="row"><span class="muted">Бренд</span><span>${a.brand}</span></div>
         <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(a.leads)} / ${WA.instTxt(a)} / ${WA.num(a.sales)}</span></div>
         <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(a.revenue)}</span></div>
@@ -665,7 +665,7 @@ WA.pageDaily = async () => {
         document.getElementById("stack-area").parentElement.after(el);
       }
       const share = b.from === b.to ? "дня" : "периода";
-      el.innerHTML = top.map((x, i) => `<span style="--i:${i}"><b>${x.key}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("");
+      el.innerHTML = top.map((x, i) => `<span style="--i:${i}"><b>${WA.esc(x.key)}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("");
     }
   };
   if (topSel) {
@@ -755,7 +755,7 @@ WA.pageDead = async () => {
     document.querySelector("#dead-app-table tbody").innerHTML = appSlice.length
       ? appSlice.map((a) => `
         <tr data-href="${WA.href("/app.html", { p: a.package })}">
-          <td class="mono">${a.package}</td>
+          <td class="mono">${WA.esc(a.package)}</td>
           <td>${a.brand}</td>
           <td class="num">${WA.num(a.countries)}</td>
           <td class="num">${WA.instTxt(a)}</td>
@@ -767,7 +767,7 @@ WA.pageDead = async () => {
     document.querySelectorAll("#dead-app-table tbody tr[data-href]").forEach((tr) => tr.onclick = () => location.href = tr.dataset.href);
     document.getElementById("dead-app-cards").innerHTML = appSlice.map((a) => `
       <a class="card mobile-card" href="${WA.href("/app.html", { p: a.package })}">
-        <strong class="mono">${a.package}</strong>
+        <strong class="mono">${WA.esc(a.package)}</strong>
         <div class="row"><span class="muted">Бренд</span><span>${a.brand}</span></div>
         <div class="row"><span class="muted">Стран / инст. / рег. / деп.</span><span class="mono">${WA.num(a.countries)} / ${WA.instTxt(a)} / ${WA.num(a.leads)} / ${WA.num(a.sales)}</span></div>
       </a>`).join("");

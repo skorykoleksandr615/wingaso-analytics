@@ -125,39 +125,89 @@ WA.lineChart = (id, labels, data, label) => {
   return chart;
 };
 
+WA.barValuePlugin = {
+  id: "waBarValue",
+  afterDatasetsDraw(chart) {
+    if (chart.config.type !== "bar" || chart.options.indexAxis === "y") return;
+    if (!chart.options.plugins?.waBarValue) return;
+    const ctx = chart.ctx;
+    const t = WA.chartTheme();
+    ctx.save();
+    ctx.font = "600 11px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = t.text;
+    chart.data.datasets.forEach((ds, di) => {
+      const meta = chart.getDatasetMeta(di);
+      meta.data.forEach((bar, i) => {
+        const v = Number(ds.data[i]) || 0;
+        ctx.fillText(WA.num(v), bar.x, bar.y - 3);
+      });
+    });
+    ctx.restore();
+  }
+};
+
 WA.barCompare = (id, labels, leads, sales) => {
   const t = WA.baseChart();
-  return new Chart(document.getElementById(id), {
+  const showNums = labels.length <= 16;
+  const chart = new Chart(document.getElementById(id), {
     type: "bar",
     data: {
       labels,
       datasets: [
-        { label: "Регистрации", data: leads, backgroundColor: "#16213e", borderColor: "#2a2a4a", borderWidth: 1 },
-        { label: "Депозиты", data: sales, backgroundColor: "#e94560" }
+        { label: "Регистрации", data: leads, backgroundColor: "#4c8dff", borderWidth: 0 },
+        { label: "Депозиты", data: sales, backgroundColor: "#e94560", borderWidth: 0 }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       animation: WA.chartAnim(),
+      layout: { padding: { top: showNums ? 18 : 0 } },
       plugins: {
-        legend: { position: "top" },
+        waBarValue: showNums,
+        legend: {
+          position: "top",
+          labels: {
+            color: t.text,
+            font: { size: 12, weight: "600" },
+            generateLabels: (c) => (c.data.datasets || []).map((ds, i) => ({
+              text: ds.label,
+              fillStyle: ds.backgroundColor,
+              strokeStyle: "transparent",
+              fontColor: t.text,
+              hidden: false,
+              datasetIndex: i
+            }))
+          }
+        },
         tooltip: {
           callbacks: {
-            label: (ctx) => {
-              const rowTotal = (Number(leads[ctx.dataIndex]) || 0) + (Number(sales[ctx.dataIndex]) || 0) || 1;
-              const p = ((Number(ctx.parsed.y) || 0) / rowTotal * 100).toFixed(1);
-              return `${ctx.dataset.label}: ${WA.num(ctx.parsed.y)} · ${p}%`;
-            }
+            label: (ctx) => `${ctx.dataset.label}: ${WA.num(ctx.parsed.y)}`
           }
         }
       },
       scales: {
         x: { ticks: { maxTicksLimit: 8, color: t.tick }, grid: { display: false } },
-        y: { ticks: { color: t.tick }, grid: { color: t.grid } }
+        y: { ticks: { color: t.tick }, grid: { color: t.grid }, grace: "12%" }
       }
-    }
+    },
+    plugins: [WA.barValuePlugin]
   });
+  const host = document.getElementById(id)?.closest(".chart-card") || document.getElementById(id)?.parentElement;
+  if (host) {
+    let el = host.querySelector(".chart-pct");
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "chart-pct";
+      document.getElementById(id).parentElement.after(el);
+    }
+    el.innerHTML = labels.length <= 16
+      ? labels.map((label, i) => `<span style="--i:${i}"><b>${label}</b> ${WA.num(leads[i])} рег. · ${WA.num(sales[i])} деп.</span>`).join("")
+      : "";
+  }
+  return chart;
 };
 
 WA.hBar = (id, labels, data) => {

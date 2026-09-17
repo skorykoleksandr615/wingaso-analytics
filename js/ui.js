@@ -75,6 +75,7 @@ WA.toggleTheme = () => {
   const next = (localStorage.getItem("wa-theme") || "dark") === "dark" ? "light" : "dark";
   localStorage.setItem("wa-theme", next);
   WA.applyTheme();
+  if (WA.paintCharts) WA.paintCharts();
 };
 
 WA.deltaHtml = (cur, prev) => {

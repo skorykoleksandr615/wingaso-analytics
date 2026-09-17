@@ -16,11 +16,32 @@ WA.chartAnim = () => {
 
 WA.baseChart = () => {
   const t = WA.chartTheme();
-  Chart.defaults.color = t.tick;
+  Chart.defaults.color = t.text;
   Chart.defaults.borderColor = t.grid;
   Chart.defaults.font.family = "Inter, system-ui, sans-serif";
   Chart.defaults.animation = WA.chartAnim();
   return t;
+};
+
+WA.paintCharts = () => {
+  const t = WA.baseChart();
+  document.querySelectorAll("canvas").forEach((el) => {
+    const ch = Chart.getChart(el);
+    if (!ch) return;
+    const scales = ch.options.scales || {};
+    if (ch.options.indexAxis === "y") {
+      if (scales.y?.ticks) scales.y.ticks.color = t.text;
+      if (scales.x?.ticks) scales.x.ticks.color = t.tick;
+    } else {
+      if (scales.x?.ticks) scales.x.ticks.color = t.tick;
+      if (scales.y?.ticks) scales.y.ticks.color = t.tick;
+    }
+    Object.values(scales).forEach((s) => {
+      if (s?.grid) s.grid.color = t.grid;
+    });
+    if (ch.options.plugins?.legend?.labels) ch.options.plugins.legend.labels.color = t.text;
+    ch.update("none");
+  });
 };
 
 WA.pctLegend = (canvasId, labels, values) => {
@@ -172,14 +193,18 @@ WA.barCompare = (id, labels, leads, sales) => {
           labels: {
             color: t.text,
             font: { size: 12, weight: "600" },
-            generateLabels: (c) => (c.data.datasets || []).map((ds, i) => ({
-              text: ds.label,
-              fillStyle: ds.backgroundColor,
-              strokeStyle: "transparent",
-              fontColor: t.text,
-              hidden: false,
-              datasetIndex: i
-            }))
+            generateLabels: (c) => (c.data.datasets || []).map((ds, i) => {
+              const ink = WA.chartTheme().text;
+              return {
+                text: ds.label,
+                fillStyle: ds.backgroundColor,
+                strokeStyle: "transparent",
+                color: ink,
+                fontColor: ink,
+                hidden: false,
+                datasetIndex: i
+              };
+            })
           }
         },
         tooltip: {
@@ -266,10 +291,11 @@ WA.piePctPlugin = {
       if (p < 3.5) return;
       const pos = arc.tooltipPosition();
       const text = p.toFixed(1) + "%";
+      const ink = WA.chartTheme();
       ctx.lineWidth = 3;
-      ctx.strokeStyle = "rgba(7,7,18,.55)";
+      ctx.strokeStyle = ink.text === "#ffffff" ? "rgba(7,7,18,.55)" : "rgba(255,255,255,.75)";
       ctx.strokeText(text, pos.x, pos.y);
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = ink.text;
       ctx.fillText(text, pos.x, pos.y);
     });
     ctx.restore();
@@ -298,14 +324,18 @@ WA.pie = (id, labels, data) => {
             color: t.text,
             font: { size: 12, weight: "600" },
             padding: 10,
-            generateLabels: (c) => (c.data.labels || []).map((label, i) => ({
-              text: `${label}  ${((values[i] || 0) / total * 100).toFixed(1)}%`,
-              fillStyle: colors[i % colors.length],
-              strokeStyle: "transparent",
-              fontColor: t.text,
-              hidden: false,
-              index: i
-            }))
+            generateLabels: (c) => (c.data.labels || []).map((label, i) => {
+              const ink = WA.chartTheme().text;
+              return {
+                text: `${label}  ${((values[i] || 0) / total * 100).toFixed(1)}%`,
+                fillStyle: colors[i % colors.length],
+                strokeStyle: "transparent",
+                color: ink,
+                fontColor: ink,
+                hidden: false,
+                index: i
+              };
+            })
           }
         },
         tooltip: {

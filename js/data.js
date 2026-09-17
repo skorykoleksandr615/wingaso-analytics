@@ -159,8 +159,10 @@ WA.bounds = (range, from, to) => {
     return d.toISOString().slice(0, 10);
   };
   if (range === "yesterday") {
-    const y = WA.yesterdayYmd();
-    return { from: y, to: y };
+    const cal = WA.yesterdayYmd();
+    const hasCal = (WA.daily || []).some((d) => d.date === cal);
+    const day = hasCal ? cal : end;
+    return { from: day, to: day };
   }
   if (range === "7") return { from: shift(7), to: end };
   if (range === "30") return { from: shift(30), to: end };
@@ -189,8 +191,12 @@ WA.sumDaily = (rows) => rows.reduce((acc, d) => {
   acc.leads += d.leads || 0;
   acc.sales += d.sales || 0;
   acc.revenue += d.revenue || 0;
+  if (d.installs != null) {
+    acc.hasInstalls = true;
+    acc.installs += Number(d.installs) || 0;
+  }
   return acc;
-}, { conversions: 0, leads: 0, sales: 0, revenue: 0 });
+}, { conversions: 0, leads: 0, sales: 0, revenue: 0, installs: 0, hasInstalls: false });
 
 WA.delta = (cur, prev) => {
   if (!prev) return 0;

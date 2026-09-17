@@ -28,12 +28,11 @@ WA.pageOverview = async () => {
   await WA.loadAgg();
   const rows = WA.aggIn(b.from, b.to);
   const countryCount = new Set(rows.map((r) => r.country)).size;
-  const hasInst = rows.some((r) => r.hasInstalls);
-  const instSum = rows.reduce((s, r) => s + (Number(r.installs) || 0), 0);
+  const instCur = cur.hasInstalls ? cur.installs : (rows.some((r) => r.hasInstalls) ? rows.reduce((s, r) => s + (Number(r.installs) || 0), 0) : null);
   document.getElementById("kpis").innerHTML = [
     ["Выручка", WA.money2(cur.revenue), WA.deltaHtml(cur.revenue, prev.revenue)],
     ["Регистрации", WA.num(cur.leads), WA.deltaHtml(cur.leads, prev.leads)],
-    ["Инсталы", hasInst ? WA.num(instSum) : "—", ""],
+    ["Инсталы", instCur == null ? "—" : WA.num(instCur), cur.hasInstalls ? WA.deltaHtml(cur.installs, prev.installs) : ""],
     ["Депозиты", WA.num(cur.sales), WA.deltaHtml(cur.sales, prev.sales)],
     ["Конверсия", WA.pctTxt(cur.sales, cur.leads), WA.deltaHtml(WA.pct(cur.sales, cur.leads), WA.pct(prev.sales, prev.leads))],
     ["Страны", WA.num(countryCount), ""]

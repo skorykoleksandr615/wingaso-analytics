@@ -112,8 +112,8 @@ WA.lineChart = (id, labels, data, label) => {
       datasets: [{
         label,
         data: values,
-        borderColor: "#e94560",
-        backgroundColor: "rgba(233,69,96,.18)",
+        borderColor: "#c9a36a",
+        backgroundColor: "rgba(201,163,106,.18)",
         fill: true,
         tension: .35,
         pointRadius: values.length <= 14 ? 3 : 0,
@@ -242,7 +242,7 @@ WA.hBar = (id, labels, data) => {
     type: "bar",
     data: {
       labels,
-      datasets: [{ label: "Выручка", data: values, backgroundColor: "#e94560" }]
+      datasets: [{ label: "Выручка", data: values, backgroundColor: "#c9a36a" }]
     },
     options: {
       indexAxis: "y",
@@ -304,7 +304,7 @@ WA.piePctPlugin = {
 
 WA.pie = (id, labels, data) => {
   const t = WA.baseChart();
-  const colors = ["#e94560","#00d26a","#4c8dff","#ffc107","#ff6b6b","#9b59b6","#1abc9c","#f39c12","#3498db","#95a5a6"];
+  const colors = ["#c9a36a","#e94560","#4c8dff","#00d26a","#d4b483","#9b59b6","#1abc9c","#f39c12","#3498db","#95a5a6"];
   const values = data.map((v) => Number(v) || 0);
   const total = values.reduce((s, v) => s + v, 0) || 1;
   const chart = new Chart(document.getElementById(id), {

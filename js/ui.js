@@ -66,9 +66,23 @@ WA.renderHeader = (active) => {
   document.getElementById("theme-btn").addEventListener("click", WA.toggleTheme);
 };
 
+WA.renderAtmosphere = () => {
+  if (!document.body || document.body.classList.contains("login-body")) return;
+  if (document.querySelector(".dash-fx")) return;
+  const fx = document.createElement("div");
+  fx.className = "dash-fx";
+  fx.setAttribute("aria-hidden", "true");
+  fx.innerHTML = `
+    <div class="dash-eagle"><img src="/assets/eagle-battle.jpg" alt=""></div>
+    <div class="dash-embers"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="dash-sheen"></div>`;
+  document.body.prepend(fx);
+};
+
 WA.applyTheme = () => {
   const theme = localStorage.getItem("wa-theme") || "dark";
   document.documentElement.setAttribute("data-theme", theme);
+  WA.renderAtmosphere();
 };
 
 WA.toggleTheme = () => {

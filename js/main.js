@@ -649,7 +649,7 @@ WA.pageDaily = async () => {
   const topSel = document.getElementById("top-n");
   const drawStack = () => {
     const raw = Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5);
-    const n = Math.max(3, Math.min(20, raw || 5));
+    const n = Math.max(3, Math.min(200, raw || 5));
     if (topSel) topSel.value = String(n);
     localStorage.setItem("wa-top-n", String(n));
     const title = document.getElementById("stack-title");
@@ -665,7 +665,9 @@ WA.pageDaily = async () => {
         document.getElementById("stack-area").parentElement.after(el);
       }
       const share = b.from === b.to ? "дня" : "периода";
-      el.innerHTML = top.map((x, i) => `<span style="--i:${i}"><b>${WA.esc(x.key)}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("");
+      el.innerHTML = top.length <= 20
+        ? top.map((x, i) => `<span style="--i:${i}"><b>${WA.esc(x.key)}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("")
+        : "";
     }
   };
   if (topSel) {

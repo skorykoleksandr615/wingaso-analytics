@@ -283,7 +283,8 @@ WA.hBar = (id, labels, data) => {
   if (prev) prev.destroy();
   const wrap = el.parentElement;
   if (wrap && wrap.classList.contains("chart-wrap")) {
-    const h = Math.max(260, labels.length * 40 + 28);
+    const row = labels.length > 40 ? 26 : 40;
+    const h = Math.max(260, labels.length * row + 28);
     wrap.style.height = h + "px";
     wrap.style.minHeight = h + "px";
   }
@@ -299,7 +300,7 @@ WA.hBar = (id, labels, data) => {
       indexAxis: "y",
       responsive: true,
       maintainAspectRatio: false,
-      animation: WA.chartAnim(),
+      animation: labels.length > 40 ? { duration: 0 } : WA.chartAnim(),
       layout: { padding: { right: 92 } },
       plugins: {
         waBarMoney: true,
@@ -316,7 +317,7 @@ WA.hBar = (id, labels, data) => {
       },
       scales: {
         x: { ticks: { color: t.tick }, grid: { color: t.grid }, grace: "18%" },
-        y: { ticks: { color: t.text, autoSkip: false, maxTicksLimit: 30 }, grid: { display: false } }
+        y: { ticks: { color: t.text, autoSkip: false, maxTicksLimit: 200 }, grid: { display: false } }
       }
     },
     plugins: [WA.barPctPlugin]

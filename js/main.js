@@ -179,18 +179,19 @@ WA.pageBrand = async () => {
 
   const apps = WA.brandApps(name).sort((a, c) => c.revenue - a.revenue);
   if (country) {
-    const pkgs = new Set(rows.filter((r) => r.package).map((r) => r.package));
-    const scoped = pkgs.size ? apps.filter((a) => pkgs.has(a.package)) : apps;
-    if (appHead) appHead.textContent = `Приложения бренда`;
+    const scoped = WA.appsForBrandCountry(name, country, b.from, b.to, rows, sum);
+    if (appHead) appHead.textContent = `Приложения в ${country}`;
     if (note) {
-      note.hidden = false;
-      note.textContent = pkgs.size
-        ? `Пакеты с трафом в ${country}.`
-        : `Выручка ${country} сверху — по бренду. Имена пакетов ниже; цифры пакета за всё время, в выгрузке нет прила × страна.`;
+      note.hidden = !scoped.note;
+      if (scoped.note) note.textContent = scoped.note;
     }
-    appTable.innerHTML = scoped.length ? scoped.map((a) => WA.appRowHtml(a, country)).join("") : `<tr><td colspan="8" class="empty">Нет приложений по этому бренду.</td></tr>`;
+    appTable.innerHTML = scoped.apps.length
+      ? scoped.apps.map((a) => WA.appRowHtml(a, country)).join("")
+      : `<tr><td colspan="8" class="empty">Нет приложений с трафом в ${country} за этот период.</td></tr>`;
     if (appCards) {
-      appCards.innerHTML = scoped.length ? scoped.map((a) => WA.appCardHtml(a, country)).join("") : `<article class="card mobile-card"><span class="muted">Нет приложений по этому бренду.</span></article>`;
+      appCards.innerHTML = scoped.apps.length
+        ? scoped.apps.map((a) => WA.appCardHtml(a, country)).join("")
+        : `<article class="card mobile-card"><span class="muted">Нет приложений с трафом в ${country} за этот период.</span></article>`;
     }
     WA.bindRowHrefs(appTable);
     return;
@@ -204,25 +205,73 @@ WA.pageBrand = async () => {
   WA.bindRowHrefs(appTable);
 };
 
-WA.appRowHtml = (a, country) => `
+WA.appsForBrandCountry = (brand, country, from, to, rows, sum) => {
+  const byPkg = WA.groupBy(rows.filter((r) => r.package), (r) => r.package).sort((a, c) => c.revenue - a.revenue);
+  if (byPkg.length) {
+    return {
+      note: `Пакеты с трафом в ${country} за период.`,
+      apps: byPkg.map((g) => ({
+        package: g.key,
+        brand,
+        leads: g.leads,
+        sales: g.sales,
+        revenue: g.revenue,
+        installs: g.installs,
+        hasInstalls: g.hasInstalls,
+        countries: 1,
+        first_date: from,
+        last_date: to
+      }))
+    };
+  }
+  const active = WA.brandAppsIn(brand, from, to);
+  if (!active.length) return { note: "", apps: [] };
+  if (active.length === 1) {
+    const only = active[0];
+    return {
+      note: `В этом периоде у бренда одно активное приложение — цифры ${country} с него.`,
+      apps: [{
+        ...only,
+        leads: sum.leads,
+        sales: sum.sales,
+        revenue: sum.revenue,
+        installs: sum.installs,
+        hasInstalls: sum.hasInstalls,
+        countries: 1
+      }]
+    };
+  }
+  return {
+    note: `Несколько прил активны в периоде, в выгрузке нет прила × страна — цифры ${country} не раскладываю по пакетам.`,
+    apps: active.map((a) => ({ ...a, unknownGeo: true, countries: "н/д" }))
+  };
+};
+
+WA.appRowHtml = (a, country) => {
+  const nd = a.unknownGeo;
+  return `
   <tr data-href="${WA.href("/app.html", { p: a.package, c: country || "" })}">
     <td class="mono">${a.package}</td>
-    <td class="num">${WA.num(a.leads)}</td>
-    <td class="num">${WA.instTxt(a)}</td>
-    <td class="num">${WA.num(a.sales)}</td>
-    <td class="num">${WA.money2(a.revenue)}</td>
-    <td class="num">${a.countries}</td>
+    <td class="num">${nd ? "н/д" : WA.num(a.leads)}</td>
+    <td class="num">${nd ? "н/д" : WA.instTxt(a)}</td>
+    <td class="num">${nd ? "н/д" : WA.num(a.sales)}</td>
+    <td class="num">${nd ? "н/д" : WA.money2(a.revenue)}</td>
+    <td class="num">${nd ? "н/д" : a.countries}</td>
     <td>${a.first_date || ""}</td>
     <td>${a.last_date || ""}</td>
   </tr>`;
+};
 
-WA.appCardHtml = (a, country) => `
+WA.appCardHtml = (a, country) => {
+  const nd = a.unknownGeo;
+  return `
   <a class="card mobile-card" href="${WA.href("/app.html", { p: a.package, c: country || "" })}">
     <strong class="mono">${a.package}</strong>
-    <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(a.leads)} / ${WA.instTxt(a)} / ${WA.num(a.sales)}</span></div>
-    <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(a.revenue)}</span></div>
-    <div class="row"><span class="muted">Страны</span><span class="mono">${a.countries}</span></div>
+    <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${nd ? "н/д" : `${WA.num(a.leads)} / ${WA.instTxt(a)} / ${WA.num(a.sales)}`}</span></div>
+    <div class="row"><span class="muted">Выручка</span><span class="mono">${nd ? "н/д" : WA.money2(a.revenue)}</span></div>
+    <div class="row"><span class="muted">Страны</span><span class="mono">${nd ? "н/д" : a.countries}</span></div>
   </a>`;
+};
 
 WA.pageCountries = async () => {
   await WA.loadAgg();
@@ -316,7 +365,7 @@ WA.pageCountry = async () => {
   document.querySelector("#brand-table tbody").innerHTML = byBrand.map((x) => `
     <tr data-href="${WA.href("/brand.html", { b: x.key, c: code })}">
       <td>${x.key}</td>
-      <td class="pkg-cell">${WA.pkgListHtml(x.key, code)}</td>
+      <td class="pkg-cell">${WA.pkgListHtml(x.key, code, b.from, b.to)}</td>
       <td class="num">${WA.num(x.leads)}</td>
       <td class="num">${WA.instTxt(x)}</td>
       <td class="num">${WA.num(x.sales)}</td>
@@ -329,7 +378,7 @@ WA.pageCountry = async () => {
     brandCards.innerHTML = byBrand.map((x) => `
       <a class="card mobile-card" href="${WA.href("/brand.html", { b: x.key, c: code })}">
         <strong>${x.key}</strong>
-        <div class="pkg-list">${WA.brandApps(x.key).sort((a, c) => c.revenue - a.revenue).map((a) => `<span class="mono">${a.package}</span>`).join("")}</div>
+        <div class="pkg-list">${WA.brandAppsIn(x.key, b.from, b.to).map((a) => `<span class="mono">${a.package}</span>`).join("")}</div>
         <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
         <div class="row"><span class="muted">Рег. / инст. / деп.</span><span class="mono">${WA.num(x.leads)} / ${WA.instTxt(x)} / ${WA.num(x.sales)}</span></div>
         <div class="row"><span class="muted">Конверсия</span><span class="mono">${WA.pctTxt(x.sales, x.leads)}</span></div>

@@ -252,8 +252,17 @@ WA.regionOf = (code) => {
 
 WA.brandApps = (brand) => WA.apps.filter((a) => a.brand === WA.clean(brand));
 
-WA.pkgListHtml = (brand, country) => {
-  const apps = WA.brandApps(brand).sort((a, c) => (c.revenue || 0) - (a.revenue || 0));
+WA.appActiveIn = (app, from, to) => {
+  const a = app.first_date || "1970-01-01";
+  const z = app.last_date || "9999-12-31";
+  return a <= to && z >= from;
+};
+
+WA.brandAppsIn = (brand, from, to) =>
+  WA.brandApps(brand).filter((a) => WA.appActiveIn(a, from, to)).sort((x, y) => (y.revenue || 0) - (x.revenue || 0));
+
+WA.pkgListHtml = (brand, country, from, to) => {
+  const apps = (from && to) ? WA.brandAppsIn(brand, from, to) : WA.brandApps(brand).sort((a, c) => (c.revenue || 0) - (a.revenue || 0));
   if (!apps.length) return "—";
   return `<div class="pkg-list">${apps.map((a) => `<a class="pkg-link" href="${WA.href("/app.html", { p: a.package, c: country || "" })}">${a.package}</a>`).join("")}</div>`;
 };

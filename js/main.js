@@ -688,7 +688,6 @@ WA.pageDead = async () => {
   document.getElementById("updated").textContent = `${b.from} → ${b.to}`;
   WA.resetTable("installs");
   const extra = WA.tableState.extra;
-  extra.noSale = true;
   extra.hasTraffic = true;
   const scoped = WA.aggIn(b.from, b.to);
   const brands = WA.groupBy(scoped, (r) => r.brand).map((x) => ({
@@ -716,6 +715,7 @@ WA.pageDead = async () => {
     };
   });
   const keep = (row) => {
+    if ((Number(row.sales) || 0) > 0 || (Number(row.revenue) || 0) > 0) return false;
     if (!WA.matchZero(row, extra)) return false;
     if (extra.hasTraffic && !((Number(row.installs) || 0) > 0 || (Number(row.leads) || 0) > 0)) return false;
     const q = (WA.tableState.query || "").toLowerCase();
@@ -740,7 +740,7 @@ WA.pageDead = async () => {
         ["Их инсталы", WA.num(inst)],
         ["Их регистрации", WA.num(leads)],
         ["Период", `${WA.fmtDay(b.from)} — ${WA.fmtDay(b.to)}`],
-        ["Фильтр", [extra.noSale && "без деп", extra.noLead && "без рег", extra.noInst && "без инст", extra.hasTraffic && "был траф"].filter(Boolean).join(" · ") || "все"]
+        ["Фильтр", ["без деп", extra.noLead && "без рег", extra.noInst && "без инст", extra.hasTraffic && "был траф"].filter(Boolean).join(" · ")]
       ].map(([label, value]) => `<article class="card kpi"><div class="label">${label}</div><div class="value">${value}</div></article>`).join("");
     }
     WA.tableState.sortKey = brandState.key;
@@ -802,12 +802,10 @@ WA.pageDead = async () => {
       WA.csv("wingaso-dead-brands.csv", ["Бренд","Страны","Инсталы","Регистрации","Депозиты","Выручка"], deadBrands.map((r) => [r.brand, r.countries, r.installs, r.leads, r.sales, r.revenue.toFixed(2)]));
     }, { once: true });
   };
-  extra.noSale = true;
   extra.hasTraffic = true;
   WA.bindTableSort(document.getElementById("dead-brand-table"), brandState, () => { WA.tableState.page = 1; draw(); });
   WA.bindTableSort(document.getElementById("dead-app-table"), appState, () => { appPage = 1; draw(); });
   WA.bindZeroFilters(document.getElementById("zero-filters"), extra, () => { WA.tableState.page = 1; appPage = 1; draw(); });
-  extra.noSale = document.querySelector("[data-zero=noSale]")?.checked;
   extra.noLead = document.querySelector("[data-zero=noLead]")?.checked;
   extra.noInst = document.querySelector("[data-zero=noInst]")?.checked;
   extra.hasTraffic = document.querySelector("[data-zero=hasTraffic]")?.checked;

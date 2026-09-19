@@ -494,8 +494,9 @@ WA.pageApp = async () => {
     found = { ...found, rows: found.rows.filter((r) => r.country === countryHint) };
   }
   const brands = found.brands || [];
-  const back = brandHint
-    ? `<a href="${WA.href("/brand.html", { b: brandHint, c: countryHint })}">← ${WA.esc(brandHint)}</a>`
+  const shownBrand = WA.brandDisplay(brandHint || brands[0] || "");
+  const back = shownBrand
+    ? `<a href="${WA.href("/brand.html", { b: shownBrand, c: countryHint })}">← ${WA.esc(shownBrand)}</a>`
     : `<a href="${WA.href("/apps.html")}">← Приложения</a>`;
   const backEl = document.getElementById("back-link");
   if (backEl) backEl.innerHTML = back;
@@ -529,8 +530,9 @@ WA.pageApp = async () => {
     ].map(([label, value]) => `<article class="card kpi"><div class="label">${label}</div><div class="value">${value}</div></article>`).join("");
   }
 
-  const grouped = WA.groupBy(found.rows, (r) => `${r.country}\t${r.brand}`).map((x) => {
-    const [country, brand] = WA.splitKey(x.key);
+  const grouped = WA.groupBy(found.rows, (r) => `${r.country}\t${WA.canonBrandKey(r.brand)}`).map((x) => {
+    const [country] = WA.splitKey(x.key);
+    const brand = WA.brandDisplay([...x.brands][0] || "");
     return {
       country, brand, leads: x.leads, installs: x.installs, hasInstalls: x.hasInstalls,
       sales: x.sales, revenue: x.revenue, rate: WA.pct(x.sales, x.leads)

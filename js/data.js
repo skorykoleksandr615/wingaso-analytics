@@ -34,14 +34,16 @@ WA.REGIONS = {
 };
 
 WA.clean = (s) => String(s || "").replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, "").trim();
-WA.brandKey = (s) => WA.clean(s).toLowerCase();
+WA.brandKey = (s) => WA.clean(s).toLowerCase().replace(/[\s\-_.']+/g, "");
 WA.sameBrand = (a, b) => WA.brandKey(a) === WA.brandKey(b) && !!WA.brandKey(a);
 WA.brandDisplay = (name) => {
   const k = WA.brandKey(name);
   if (!k) return WA.clean(name);
-  const fromList = (WA.brands || []).find((b) => WA.brandKey(b.brand) === k);
+  const fromList = (WA.brands || []).filter((b) => WA.brandKey(b.brand) === k)
+    .sort((a, c) => (c.revenue || 0) - (a.revenue || 0))[0];
   if (fromList) return fromList.brand;
-  return WA.clean(name);
+  const spaced = WA.clean(name);
+  return spaced;
 };
 WA.isUnknownBrand = (b) => {
   const s = WA.clean(b);
@@ -339,9 +341,11 @@ WA.brandAppCounts = (from, to, extra = {}) => {
   const map = new Map();
   for (const r of rows) {
     if (!r.package || !r.brand) continue;
-    let set = map.get(r.brand);
-    if (!set) { set = new Set(); map.set(r.brand, set); }
+    const bk = WA.brandKey(r.brand);
+    let set = map.get(bk);
+    if (!set) { set = new Set(); map.set(bk, set); }
     set.add(r.package);
+    map.set(r.brand, set);
   }
   const out = new Map();
   for (const [k, s] of map) out.set(k, s.size);
@@ -408,8 +412,9 @@ WA.splitKey = (key) => {
 
 WA.appsInPeriod = (from, to) => {
   const scoped = WA.aggIn(from, to).filter((r) => r.package);
-  return WA.groupBy(scoped, (r) => `${r.package}\t${r.brand}`).map((g) => {
-    const [pkg, brand] = WA.splitKey(g.key);
+  return WA.groupBy(scoped, (r) => `${r.package}\t${WA.brandKey(r.brand)}`).map((g) => {
+    const [pkg] = WA.splitKey(g.key);
+    const brand = WA.brandDisplay([...g.brands][0] || "");
     const dates = Object.keys(g.dates).sort();
     return {
       package: pkg,

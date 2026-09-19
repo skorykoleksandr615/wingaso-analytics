@@ -168,7 +168,8 @@ WA.pageBrand = async () => {
     : `<a href="${WA.href("/brands.html")}">← Бренды</a>`;
   const backEl = document.getElementById("back-link");
   if (backEl) backEl.innerHTML = back;
-  document.getElementById("title").textContent = country ? `${name} · ${WA.countryName(country)}` : (name || "Бренд");
+  const shown = WA.brandDisplay(name) || name;
+  document.getElementById("title").textContent = country ? `${shown} · ${WA.countryName(country)}` : (shown || "Бренд");
   const appCount = new Set(rows.map((r) => r.package).filter(Boolean)).size;
   document.getElementById("lead").textContent = `${WA.money2(sum.revenue)} · ${WA.num(appCount)} прил. · ${WA.num(sum.leads)} рег. · ${WA.instTxt(sum)} инст. · ${WA.num(sum.sales)} деп. · ${WA.pctTxt(sum.sales, sum.leads)} · ${b.from} → ${b.to}`;
   const byDay = WA.groupBy(rows, (r) => r.date).sort((a, c) => a.key.localeCompare(c.key));
@@ -693,7 +694,15 @@ WA.pageDead = async () => {
     rate: WA.pct(x.sales, x.leads)
   }));
   const apps = WA.appsInPeriod(b.from, b.to);
+  const pkgHasSale = new Set();
+  const pkgHasLead = new Set();
+  for (const r of scoped) {
+    if (!r.package) continue;
+    if ((Number(r.sales) || 0) > 0 || (Number(r.revenue) || 0) > 0) pkgHasSale.add(r.package);
+    if ((Number(r.leads) || 0) > 0) pkgHasLead.add(r.package);
+  }
   const keep = (row) => {
+    if (row.package && pkgHasSale.has(row.package)) return false;
     if ((Number(row.sales) || 0) > 0 || (Number(row.revenue) || 0) > 0) return false;
     if (!WA.matchZero(row, extra)) return false;
     if (extra.hasTraffic && !((Number(row.installs) || 0) > 0 || (Number(row.leads) || 0) > 0)) return false;

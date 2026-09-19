@@ -66,7 +66,7 @@ WA.pageOverview = async () => {
   if (topBrandsTitle) topBrandsTitle.textContent = `Топ-10 брендов · ${period}`;
   if (topCountriesTitle) topCountriesTitle.textContent = `Топ-10 стран · ${period}`;
   if (pieTitle) pieTitle.textContent = `Распределение выручки · ${period}`;
-  const brands = WA.groupBy(rows, (r) => WA.brandKey(r.brand)).map((x) => ({
+  const brands = WA.groupBy(rows, (r) => WA.canonBrandKey(r.brand)).map((x) => ({
     ...x,
     key: WA.brandDisplay([...x.brands][0] || x.key)
   })).sort((a, c) => c.revenue - a.revenue).slice(0, 10);
@@ -83,7 +83,7 @@ WA.pageOverview = async () => {
 
 WA.brandRows = (from, to) => {
   const rows = WA.aggIn(from, to);
-  return WA.groupBy(rows, (r) => WA.brandKey(r.brand)).map((x) => ({
+  return WA.groupBy(rows, (r) => WA.canonBrandKey(r.brand)).map((x) => ({)
     brand: WA.brandDisplay([...x.brands][0] || x.key),
     conversions: x.conversions,
     leads: x.leads,
@@ -392,7 +392,7 @@ WA.pageCountry = async () => {
   document.getElementById("lead").textContent = `${WA.money2(sum.revenue)} · ${WA.num(sum.leads)} рег. · ${WA.instTxt(sum)} инст. · ${WA.num(sum.sales)} деп. · ${WA.pctTxt(sum.sales, sum.leads)} · ${b.from} → ${b.to}`;
   const byDay = WA.groupBy(rows, (r) => r.date).sort((a, c) => a.key.localeCompare(c.key));
   WA.lineChart("rev-line", byDay.map((x) => x.key.slice(5)), byDay.map((x) => x.revenue), "Выручка");
-  const byBrand = WA.groupBy(rows, (r) => WA.brandKey(r.brand)).map((x) => ({
+  const byBrand = WA.groupBy(rows, (r) => WA.canonBrandKey(r.brand)).map((x) => ({
     brand: WA.brandDisplay([...x.brands][0] || x.key), leads: x.leads, installs: x.installs, hasInstalls: x.hasInstalls,
     sales: x.sales, revenue: x.revenue, appCount: x.apps.size, rate: WA.pct(x.sales, x.leads)
   }));
@@ -602,7 +602,7 @@ WA.pageDaily = async () => {
   const agg = WA.aggIn(b.from, b.to);
   const dayRows = days.map((d, i) => {
     const prev = days[i - 1];
-    const top = WA.groupBy(agg.filter((r) => r.date === d.date), (r) => WA.brandKey(r.brand)).sort((a, c) => c.revenue - a.revenue)[0];
+    const top = WA.groupBy(agg.filter((r) => r.date === d.date), (r) => WA.canonBrandKey(r.brand)).sort((a, c) => c.revenue - a.revenue)[0];
     const change = prev ? WA.delta(d.revenue, prev.revenue) : 0;
     return { ...d, topBrand: top ? WA.brandDisplay([...top.brands][0] || top.key) : "—", appCount: top?.apps.size || 0, change, alert: Math.abs(change) >= 35 };
   });
@@ -637,7 +637,7 @@ WA.pageDaily = async () => {
   WA.bindTableSort(document.getElementById("daily-table"), dayState, drawDays);
   drawDays();
   const periodRev = days.reduce((s, d) => s + (d.revenue || 0), 0) || 1;
-  const ranked = WA.groupBy(agg, (r) => WA.brandKey(r.brand)).map((x) => ({
+  const ranked = WA.groupBy(agg, (r) => WA.canonBrandKey(r.brand)).map((x) => ({
     ...x,
     key: WA.brandDisplay([...x.brands][0] || x.key)
   })).sort((a, c) => c.revenue - a.revenue);
@@ -682,7 +682,7 @@ WA.pageDead = async () => {
   extra.hasTraffic = true;
   const scoped = WA.aggIn(b.from, b.to);
   WA.ensureAppCountCol(document.getElementById("dead-brand-table"));
-  const brands = WA.groupBy(scoped, (r) => WA.brandKey(r.brand)).map((x) => ({
+  const brands = WA.groupBy(scoped, (r) => WA.canonBrandKey(r.brand)).map((x) => ({
     brand: WA.brandDisplay([...x.brands][0] || x.key),
     leads: x.leads,
     installs: x.installs,
@@ -824,13 +824,13 @@ WA.pageSearch = async () => {
   const brandRows = WA.brandRows(b.from, b.to);
   const periodApps = WA.appsInPeriod(b.from, b.to);
   let brands = brandRows.filter((r) => WA.matchScore(r.brand, needle));
-  const namedBrands = new Set(brands.map((r) => WA.brandKey(r.brand)));
-  const inNamed = (brand) => namedBrands.has(WA.brandKey(brand));
+  const namedBrands = new Set(brands.map((r) => WA.canonBrandKey(r.brand)));
+  const inNamed = (brand) => namedBrands.has(WA.canonBrandKey(brand));
   const pkgByName = periodApps.filter((a) => WA.matchScore(a.package, needle));
   const pkgHits = [];
   const seenHit = new Set();
   const addPkg = (a) => {
-    const k = `${a.package}\t${WA.brandKey(a.brand)}`;
+    const k = `${a.package}\t${WA.canonBrandKey(a.brand)}`;
     if (seenHit.has(k)) return;
     seenHit.add(k);
     pkgHits.push(a);
@@ -842,7 +842,7 @@ WA.pageSearch = async () => {
       const row = brandRows.find((r) => WA.sameBrand(r.brand, a.brand));
       if (row) {
         brands.push(row);
-        namedBrands.add(WA.brandKey(a.brand));
+        namedBrands.add(WA.canonBrandKey(a.brand));
       }
     }
   }

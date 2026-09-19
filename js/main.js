@@ -83,7 +83,7 @@ WA.pageOverview = async () => {
 
 WA.brandRows = (from, to) => {
   const rows = WA.aggIn(from, to);
-  return WA.groupBy(rows, (r) => WA.canonBrandKey(r.brand)).map((x) => ({)
+  return WA.groupBy(rows, (r) => WA.canonBrandKey(r.brand)).map((x) => ({
     brand: WA.brandDisplay([...x.brands][0] || x.key),
     conversions: x.conversions,
     leads: x.leads,

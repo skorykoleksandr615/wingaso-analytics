@@ -95,7 +95,7 @@ const LOGIN_PAGE = `<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=26">
+  <link rel="stylesheet" href="/css/style.css?v=31">
 </head>
 <body class="login-body">
   <div class="login-stage">
@@ -143,6 +143,33 @@ function loginPage() {
   });
 }
 
+const DATA_GH = "https://raw.githubusercontent.com/skorykoleksandr615/wingaso-analytics/main/data/";
+const DATA_FILES = new Set([
+  "meta.json", "daily.json", "aggregated.json", "apps.json",
+  "brands.json", "countries.json", "brand_cache.json"
+]);
+
+async function liveDump(path) {
+  const name = path.slice("/data/".length);
+  if (!DATA_FILES.has(name)) return null;
+  try {
+    const upstream = await fetch(DATA_GH + name, {
+      headers: { "User-Agent": "wingaso-analytics" },
+      cf: { cacheTtl: 20, cacheEverything: true }
+    });
+    if (!upstream.ok) return null;
+    return new Response(upstream.body, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store"
+      }
+    });
+  } catch {
+    return null;
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -187,6 +214,11 @@ export default {
 
     if (path === "/login" || path === "/login.html") {
       return loginPage();
+    }
+
+    if (path.startsWith("/data/") && path.endsWith(".json")) {
+      const live = await liveDump(path);
+      if (live) return live;
     }
 
     const res = await env.ASSETS.fetch(request);

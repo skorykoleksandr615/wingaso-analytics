@@ -3,37 +3,54 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Приложения — WingAso Analytics</title>
-  <meta name="description" content="Пакеты приложений: бренд, конверсии, выручка, первая и последняя дата.">
-  <link rel="canonical" href="https://wingasoanalytics.online/apps.html">
+  <title>Поиск — WingAso Analytics</title>
+  <meta name="description" content="Поиск бренда или пакета: выручка, регистрации, депозиты, страны и приложения.">
+  <link rel="canonical" href="https://wingasoanalytics.online/search.html">
   <link rel="icon" href="/assets/favicon.png?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css?v=31">
 </head>
-<body data-page="apps">
+<body data-page="search">
   <header class="app-header" id="app-header"></header>
   <main class="wrap" id="content">
     <div class="page-head">
       <div>
-        <h1>Приложения</h1>
-        <p class="muted" id="updated"></p>
+        <h1>Поиск</h1>
+        <p class="muted" id="updated">Бренд или имя пакета — полная инфа за выбранный период</p>
       </div>
     </div>
     <div class="toolbar">
-      <input class="search" id="app-search" placeholder="Поиск пакета или бренда">
-      <select class="field" id="active-filter">
-        <option value="all">Все приложения</option>
-        <option value="7">Активны за 7 дней</option>
-      </select>
-      <div class="filter-chips" id="zero-filters">
-        <label class="chip"><input type="checkbox" data-zero="noInst"> Без инсталов</label>
-        <label class="chip"><input type="checkbox" data-zero="noLead"> Без регистраций</label>
-        <label class="chip"><input type="checkbox" data-zero="noSale"> Без депозитов</label>
+      <div class="global-search page-search" id="global-search">
+        <input class="search" id="q-search" type="search" placeholder="Бренд или пакет" autocomplete="off" spellcheck="false" enterkeyhint="search" autofocus>
+        <div class="search-drop" id="q-drop" hidden></div>
       </div>
     </div>
-    <article class="card table-card desktop-only">
+    <section class="kpi-grid" id="kpis"></section>
+    <article class="card table-card desktop-only" style="margin-top:12px">
+      <h2 id="brand-head">Бренды</h2>
+      <div class="table-scroll">
+        <table class="data" id="brand-table">
+          <thead>
+            <tr>
+              <th data-key="brand" data-dir="asc">Бренд</th>
+              <th class="num" data-key="appCount">Прилы</th>
+              <th class="num" data-key="countryCount">Страны</th>
+              <th class="num" data-key="installs">Инсталы</th>
+              <th class="num" data-key="leads">Регистрации</th>
+              <th class="num" data-key="sales">Депозиты</th>
+              <th class="num" data-key="revenue">Выручка</th>
+              <th class="num" data-key="rate">Конверсия</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </article>
+    <div class="cards-mobile" id="brand-cards"></div>
+    <article class="card table-card desktop-only" style="margin-top:12px">
+      <h2 id="app-head">Пакеты</h2>
       <div class="table-scroll">
         <table class="data" id="app-table">
           <thead>
@@ -55,6 +72,7 @@
       <div class="pager" id="app-pager"></div>
     </article>
     <div class="cards-mobile" id="app-cards"></div>
+    <p class="note" id="outside-note" hidden></p>
   </main>
   <footer class="footer">WingAso Analytics</footer>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>

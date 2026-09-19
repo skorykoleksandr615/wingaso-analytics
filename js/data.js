@@ -34,12 +34,115 @@ WA.REGIONS = {
 };
 
 WA.clean = (s) => String(s || "").replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, "").trim();
+WA.brandKey = (s) => WA.clean(s).toLowerCase();
+WA.sameBrand = (a, b) => WA.brandKey(a) === WA.brandKey(b) && !!WA.brandKey(a);
+WA.brandDisplay = (name) => {
+  const k = WA.brandKey(name);
+  if (!k) return WA.clean(name);
+  const fromList = (WA.brands || []).find((b) => WA.brandKey(b.brand) === k);
+  if (fromList) return fromList.brand;
+  return WA.clean(name);
+};
+WA.isUnknownBrand = (b) => {
+  const s = WA.clean(b);
+  return !s || /^unknown$/i.test(s);
+};
+WA.rememberBrand = (pkg, brand) => {
+  const p = WA.clean(pkg);
+  const b = WA.clean(brand);
+  if (!p || WA.isUnknownBrand(b)) return;
+  if (!WA.pkgBrand) WA.pkgBrand = new Map();
+  if (!WA.pkgBrand.has(p)) WA.pkgBrand.set(p, b);
+};
+WA.brandOfPkg = (pkg) => (WA.pkgBrand && WA.pkgBrand.get(WA.clean(pkg))) || "";
+WA.remapBrand = (pkg, brand) => {
+  const b = WA.clean(brand);
+  if (!WA.isUnknownBrand(b)) return b;
+  return WA.brandOfPkg(pkg) || b;
+};
 WA.esc = (s) => String(s ?? "").replace(/[&<>"'`]/g, (c) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "`": "&#96;"
 }[c]));
+WA.BLOCKED_PKGS = new Set([
+  "com.armycraft.stickmanarmy",
+  "com.equilibrium.blockbalance",
+  "com.fatal.iodgf.iltiric",
+  "com.silo.cloth.elect.brand.arrow.danskespii",
+  "a1leatherjackets.com",
+  "bbhbet.space",
+  "bchgang.net",
+  "betboom.space",
+  "betfred.website",
+  "betfury.rest",
+  "betika.casa",
+  "betjee.space",
+  "brazino777.space",
+  "bustyescortsislamabad.online",
+  "bwin.monster",
+  "casinoggbet.space",
+  "casinorainbet.site",
+  "crazytime.rest",
+  "crowncasino.rest",
+  "dragonmoney.quest",
+  "favbet.space",
+  "fdj.monster",
+  "fonbet.health",
+  "fortunacasino.casino",
+  "hollandcasino.cfd",
+  "hy.hotelescortsskarachi.com",
+  "inbet.rest",
+  "jackpotcity.sbs",
+  "jugabet.online",
+  "leoncasino.space",
+  "leovegas.ink",
+  "lottoland.space",
+  "luckia.space",
+  "masterseo88.com",
+  "nonsktipping.space",
+  "nustarcasino.casino",
+  "nvcasino.onl",
+  "olybet.monster",
+  "parimatch.sbs",
+  "planetwin365.cfd",
+  "platin.rest",
+  "pokerstarscasino.casino",
+  "polymarket.technology",
+  "posido.website",
+  "roobet.space",
+  "sceneflac.blogspot.com",
+  "spillehallen.space",
+  "sportium.monster",
+  "sportsbet.pics",
+  "synottip.space",
+  "taxivendingusa.com",
+  "tombola.monster",
+  "totalcasino.club",
+  "vegashero.rest",
+  "vegashu.space",
+  "vincitu.online",
+  "vipmassagecenterkarachi.com",
+  "yukongoldcasino.shop",
+  "belbet.online",
+  "betpawa.cfd",
+  "fittools.in",
+  "interwetten.space",
+  "lottomatica.site",
+  "pafiangkolabarat.org",
+  "pafiangkolaselatan.org",
+  "pafibudiagung.org",
+  "ug8838.com",
+  "voleybetares.ink",
+  "webcommers.com",
+  "bbrbet.space",
+  "fittools.ir",
+  "norsktipping.space",
+  "volevbetares.ink"
+]);
+WA.isBlockedPkg = (p) => WA.BLOCKED_PKGS.has(WA.clean(p).toLowerCase());
 WA.isPkg = (p) => {
   const s = WA.clean(p);
-  return s.length >= 3 && s.length <= 180 && /^[A-Za-z][A-Za-z0-9_]{0,40}(\.[A-Za-z][A-Za-z0-9_]{0,40}){1,12}$/.test(s);
+  if (s.length < 3 || s.length > 180 || /[\/?#\s:]/.test(s)) return false;
+  return /^[A-Za-z][A-Za-z0-9_]{0,40}(\.[A-Za-z][A-Za-z0-9_]{0,40}){1,12}$/.test(s) && !WA.isBlockedPkg(s);
 };
 
 WA.money = (n) => "$" + (Number(n) || 0).toLocaleString("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -96,14 +199,19 @@ async function fetchJson(path) {
 }
 
 WA.loadCore = async () => {
-  const [meta, brands, countries, apps, daily] = await Promise.all([
+  const [meta, brands, countries, apps, daily, brandCache] = await Promise.all([
     fetchJson("/data/meta.json"),
     fetchJson("/data/brands.json"),
     fetchJson("/data/countries.json"),
     fetchJson("/data/apps.json"),
-    fetchJson("/data/daily.json")
+    fetchJson("/data/daily.json"),
+    fetchJson("/data/brand_cache.json").catch(() => [])
   ]);
   WA.meta = meta;
+  WA.pkgBrand = new Map();
+  for (const x of brandCache || []) {
+    if (!WA.isBlockedPkg(x.package)) WA.rememberBrand(x.package, x.brand);
+  }
   const map = new Map();
   for (const b of brands) {
     const name = WA.clean(b.brand);
@@ -118,7 +226,11 @@ WA.loadCore = async () => {
   }
   WA.brands = [...map.values()].sort((a, b) => b.revenue - a.revenue);
   WA.countries = countries;
-  WA.apps = apps.filter((a) => WA.isPkg(a.package)).map((a) => ({ ...a, brand: WA.clean(a.brand), package: WA.clean(a.package) }));
+  WA.apps = apps.filter((a) => WA.isPkg(a.package)).map((a) => {
+    const pkg = WA.clean(a.package);
+    WA.rememberBrand(pkg, a.brand);
+    return { ...a, brand: WA.remapBrand(pkg, a.brand), package: pkg };
+  });
   WA.daily = daily.slice().sort((a, b) => a.date.localeCompare(b.date));
   return WA;
 };
@@ -126,14 +238,19 @@ WA.loadCore = async () => {
 WA.loadAgg = async () => {
   if (WA.aggregated) return WA.aggregated;
   const rows = await fetchJson("/data/aggregated.json");
-  WA.aggregated = rows.filter((r) => !r.package || WA.isPkg(r.package)).map((r) => ({
-    ...r,
-    brand: WA.clean(r.brand),
-    package: r.package ? WA.clean(r.package) : "",
-    installs: r.installs,
-    hasInstalls: r.installs != null,
-    conversions: (r.leads || 0) + (r.sales || 0)
-  }));
+  WA.aggregated = rows.filter((r) => !r.package || WA.isPkg(r.package)).map((r) => {
+    const pkg = r.package ? WA.clean(r.package) : "";
+    const brand = WA.remapBrand(pkg, r.brand);
+    if (pkg) WA.rememberBrand(pkg, brand);
+    return {
+      ...r,
+      brand,
+      package: pkg,
+      installs: r.installs,
+      hasInstalls: r.installs != null,
+      conversions: (r.leads || 0) + (r.sales || 0)
+    };
+  });
   return WA.aggregated;
 };
 
@@ -215,6 +332,34 @@ WA.delta = (cur, prev) => {
 
 WA.aggIn = (from, to) => (WA.aggregated || []).filter((r) => WA.inRange(r.date, from, to));
 
+WA.brandAppCounts = (from, to, extra = {}) => {
+  let rows = WA.aggIn(from, to);
+  if (extra.country) rows = rows.filter((r) => r.country === extra.country);
+  if (extra.date) rows = rows.filter((r) => r.date === extra.date);
+  const map = new Map();
+  for (const r of rows) {
+    if (!r.package || !r.brand) continue;
+    let set = map.get(r.brand);
+    if (!set) { set = new Set(); map.set(r.brand, set); }
+    set.add(r.package);
+  }
+  const out = new Map();
+  for (const [k, s] of map) out.set(k, s.size);
+  return out;
+};
+
+WA.ensureAppCountCol = (table, afterKey = "brand") => {
+  const tr = table && table.tHead && table.tHead.rows[0];
+  if (!tr || tr.querySelector('[data-key="appCount"]')) return;
+  const after = tr.querySelector(`[data-key="${afterKey}"]`);
+  const th = document.createElement("th");
+  th.className = "num";
+  th.dataset.key = "appCount";
+  th.textContent = "Прилы";
+  if (after) after.after(th);
+  else tr.appendChild(th);
+};
+
 WA.groupBy = (rows, keyFn) => {
   const map = new Map();
   for (const r of rows) {
@@ -231,6 +376,7 @@ WA.groupBy = (rows, keyFn) => {
     prev.dates[r.date] = (prev.dates[r.date] || 0) + (r.revenue || 0);
     if (r.country) prev.countries.add(r.country);
     if (r.brand) prev.brands.add(r.brand);
+    if (r.package) prev.apps.add(r.package);
     map.set(k, prev);
   }
   return [...map.values()];
@@ -283,13 +429,13 @@ WA.appsInPeriod = (from, to) => {
 
 WA.pkgsFor = (from, to, extra = {}) => {
   let rows = WA.aggIn(from, to).filter((r) => r.package);
-  if (extra.brand) rows = rows.filter((r) => r.brand === WA.clean(extra.brand));
+  if (extra.brand) rows = rows.filter((r) => WA.sameBrand(r.brand, extra.brand));
   if (extra.country) rows = rows.filter((r) => r.country === extra.country);
   if (extra.package) rows = rows.filter((r) => r.package === extra.package);
   return WA.groupBy(rows, (r) => r.package).sort((a, c) => c.revenue - a.revenue);
 };
 
-WA.brandApps = (brand) => WA.appsInPeriod(WA.meta?.period?.from || "1970-01-01", WA.meta?.period?.to || "9999-12-31").filter((a) => a.brand === WA.clean(brand));
+WA.brandApps = (brand) => WA.appsInPeriod(WA.meta?.period?.from || "1970-01-01", WA.meta?.period?.to || "9999-12-31").filter((a) => WA.sameBrand(a.brand, brand));
 
 WA.appActiveIn = (app, from, to) => {
   const a = app.first_date || "1970-01-01";
@@ -298,7 +444,7 @@ WA.appActiveIn = (app, from, to) => {
 };
 
 WA.brandAppsIn = (brand, from, to) =>
-  WA.appsInPeriod(from, to).filter((a) => a.brand === WA.clean(brand)).sort((x, y) => (y.revenue || 0) - (x.revenue || 0));
+  WA.appsInPeriod(from, to).filter((a) => WA.sameBrand(a.brand, brand)).sort((x, y) => (y.revenue || 0) - (x.revenue || 0));
 
 WA.pkgListHtml = (brand, country, from, to) => {
   const apps = WA.pkgsFor(from, to, { brand, country });
@@ -315,9 +461,71 @@ WA.bindRowHrefs = (root) => {
   });
 };
 
+WA.normQ = (s) => WA.clean(s).toLowerCase();
+WA.matchScore = (hay, needle) => {
+  const h = WA.normQ(hay);
+  if (!needle || !h) return 0;
+  if (h === needle) return 300;
+  if (h.startsWith(needle)) return 200;
+  if (h.includes(needle)) return 100;
+  return 0;
+};
+
+WA.searchHits = (q, limit = 12) => {
+  const needle = WA.normQ(q);
+  if (needle.length < 1) return [];
+  const out = [];
+  for (const b of WA.brands || []) {
+    const s = WA.matchScore(b.brand, needle);
+    if (!s) continue;
+    out.push({
+      type: "brand",
+      key: b.brand,
+      brand: b.brand,
+      score: s,
+      revenue: b.revenue,
+      leads: b.leads,
+      sales: b.sales,
+      apps: b.apps
+    });
+  }
+  for (const a of WA.apps || []) {
+    const s = WA.matchScore(a.package, needle);
+    if (!s) continue;
+    out.push({
+      type: "app",
+      key: a.package,
+      brand: a.brand,
+      package: a.package,
+      score: s,
+      revenue: a.revenue,
+      leads: a.leads,
+      sales: a.sales
+    });
+  }
+  out.sort((a, c) => c.score - a.score || (c.revenue || 0) - (a.revenue || 0));
+  const seen = new Set();
+  const uniq = [];
+  for (const x of out) {
+    const k = x.type === "brand" ? `brand\t${WA.brandKey(x.brand || x.key)}` : `app\t${x.key}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    if (x.type === "brand") x.brand = WA.brandDisplay(x.brand || x.key);
+    uniq.push(x);
+    if (uniq.length >= limit) break;
+  }
+  return uniq;
+};
+
+WA.searchHref = (hit) => {
+  if (!hit) return WA.href("/search.html");
+  if (hit.type === "brand") return WA.href("/brand.html", { b: hit.brand || hit.key });
+  return WA.href("/app.html", { p: hit.package || hit.key, b: hit.brand || "" });
+};
+
 WA.appCountryRows = (pkg, from, to, brand) => {
   let rows = WA.aggIn(from, to).filter((r) => r.package === pkg);
-  if (brand) rows = rows.filter((r) => r.brand === WA.clean(brand));
+  if (brand) rows = rows.filter((r) => WA.sameBrand(r.brand, brand));
   const brands = [...new Set(rows.map((r) => r.brand).filter(Boolean))];
   return {
     rows,

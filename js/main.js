@@ -693,6 +693,7 @@ WA.pageDead = async () => {
     revenue: x.revenue,
     countries: x.countries.size,
     appCount: x.apps.size,
+    pkgs: x.apps,
     rate: WA.pct(x.sales, x.leads)
   }));
   const apps = WA.appsInPeriod(b.from, b.to);
@@ -705,6 +706,7 @@ WA.pageDead = async () => {
   }
   const keep = (row) => {
     if (row.package && pkgHasSale.has(row.package)) return false;
+    if (row.pkgs && [...row.pkgs].some((p) => pkgHasSale.has(p))) return false;
     if ((Number(row.sales) || 0) > 0 || (Number(row.revenue) || 0) > 0) return false;
     if (!WA.matchZero(row, extra)) return false;
     if (extra.hasTraffic && !((Number(row.installs) || 0) > 0 || (Number(row.leads) || 0) > 0)) return false;

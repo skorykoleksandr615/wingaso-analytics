@@ -66,11 +66,9 @@ WA.rememberBrand = (pkg, brand, force) => {
 };
 WA.brandOfPkg = (pkg) => (WA.pkgBrand && WA.pkgBrand.get(WA.clean(pkg))) || "";
 WA.remapBrand = (pkg, brand) => {
-  const mapped = WA.brandOfPkg(pkg);
-  if (mapped) return mapped;
   const b = WA.clean(brand);
-  if (WA.isUnknownBrand(b)) return b;
-  return WA.brandDisplay(b);
+  if (WA.isUnknownBrand(b)) return WA.brandOfPkg(pkg) || b;
+  return b;
 };
 WA.esc = (s) => String(s ?? "").replace(/[&<>"'`]/g, (c) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "`": "&#96;"
@@ -264,65 +262,7 @@ WA.loadAgg = async () => {
       conversions: (r.leads || 0) + (r.sales || 0)
     };
   });
-  WA.unifyPkgBrands();
   return WA.aggregated;
-};
-
-WA.unifyPkgBrands = () => {
-  try {
-    const score = (x) => (Number(x.revenue) || 0) * 1000 + (Number(x.sales) || 0) * 10 + (Number(x.leads) || 0) + String(x.brand || "").length * 0.01;
-    const byPkg = new Map();
-    const ingest = (pkg, brand, rev, sales, leads) => {
-      const p = WA.clean(pkg);
-      const b = WA.clean(brand);
-      if (!p || !b || WA.isUnknownBrand(b)) return;
-      let m = byPkg.get(p);
-      if (!m) { m = new Map(); byPkg.set(p, m); }
-      const prev = m.get(b) || { brand: b, revenue: 0, sales: 0, leads: 0 };
-      prev.revenue += Number(rev) || 0;
-      prev.sales += Number(sales) || 0;
-      prev.leads += Number(leads) || 0;
-      m.set(b, prev);
-    };
-    for (const r of WA.aggregated || []) ingest(r.package, r.brand, r.revenue, r.sales, r.leads);
-    for (const a of WA.apps || []) ingest(a.package, a.brand, a.revenue, a.sales, a.leads);
-
-    const ranked = [];
-    for (const [pkg, m] of byPkg) {
-      const list = [...m.values()];
-      if (!list.length) continue;
-      list.sort((a, c) => score(c) - score(a));
-      ranked.push({ pkg, list, win: list[0], sc: score(list[0]) });
-    }
-    ranked.sort((a, c) => c.sc - a.sc);
-
-    WA.brandCanon = new Map();
-    WA.brandTitle = new Map();
-    for (const { list, win } of ranked) {
-      const winKey = WA.brandKey(win.brand);
-      if (!winKey) continue;
-      if (!WA.brandTitle.has(winKey)) WA.brandTitle.set(winKey, win.brand);
-      for (const x of list) {
-        const k = WA.brandKey(x.brand);
-        if (k && !WA.brandCanon.has(k)) WA.brandCanon.set(k, winKey);
-      }
-    }
-    for (const { pkg, win } of ranked) {
-      const canon = WA.brandCanon.get(WA.brandKey(win.brand)) || WA.brandKey(win.brand);
-      const title = WA.brandTitle.get(canon) || win.brand;
-      WA.rememberBrand(pkg, title, true);
-    }
-    for (const r of WA.aggregated || []) {
-      if (!r.package) continue;
-      r.brand = WA.brandOfPkg(r.package) || r.brand;
-    }
-    for (const a of WA.apps || []) {
-      a.brand = WA.brandOfPkg(a.package) || a.brand;
-    }
-  } catch (e) {
-    WA.brandCanon = WA.brandCanon || new Map();
-    WA.brandTitle = WA.brandTitle || new Map();
-  }
 };
 
 WA.rangeFrom = () => {

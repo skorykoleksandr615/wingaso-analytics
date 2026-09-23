@@ -684,29 +684,14 @@ WA.pageDead = async () => {
   extra.hasTraffic = true;
   const scoped = WA.aggIn(b.from, b.to);
   WA.ensureAppCountCol(document.getElementById("dead-brand-table"));
-  const brands = WA.groupBy(scoped, (r) => WA.canonBrandKey(r.brand)).map((x) => ({
-    brand: WA.brandDisplay([...x.brands][0] || x.key),
-    leads: x.leads,
-    installs: x.installs,
-    hasInstalls: x.hasInstalls,
-    sales: x.sales,
-    revenue: x.revenue,
-    countries: x.countries.size,
-    appCount: x.apps.size,
-    pkgs: x.apps,
-    rate: WA.pct(x.sales, x.leads)
-  }));
   const apps = WA.appsInPeriod(b.from, b.to);
   const pkgHasSale = new Set();
-  const pkgHasLead = new Set();
   for (const r of scoped) {
     if (!r.package) continue;
     if ((Number(r.sales) || 0) > 0 || (Number(r.revenue) || 0) > 0) pkgHasSale.add(r.package);
-    if ((Number(r.leads) || 0) > 0) pkgHasLead.add(r.package);
   }
-  const keep = (row) => {
+  const keepApp = (row) => {
     if (row.package && pkgHasSale.has(row.package)) return false;
-    if (row.pkgs && [...row.pkgs].some((p) => pkgHasSale.has(p))) return false;
     if ((Number(row.sales) || 0) > 0 || (Number(row.revenue) || 0) > 0) return false;
     if (!WA.matchZero(row, extra)) return false;
     if (extra.hasTraffic && !((Number(row.installs) || 0) > 0 || (Number(row.leads) || 0) > 0)) return false;
@@ -714,18 +699,56 @@ WA.pageDead = async () => {
     if (!q) return true;
     return String(row.brand || "").toLowerCase().includes(q) || String(row.package || "").toLowerCase().includes(q);
   };
+  const brandsFromApps = (list) => {
+    const map = new Map();
+    for (const a of list) {
+      const k = WA.canonBrandKey(a.brand);
+      if (!k) continue;
+      const prev = map.get(k) || {
+        brand: WA.brandDisplay(a.brand),
+        leads: 0,
+        installs: 0,
+        hasInstalls: false,
+        sales: 0,
+        revenue: 0,
+        countries: 0,
+        appCount: 0,
+        rate: 0
+      };
+      prev.leads += Number(a.leads) || 0;
+      prev.installs += Number(a.installs) || 0;
+      if (a.hasInstalls) prev.hasInstalls = true;
+      prev.sales += Number(a.sales) || 0;
+      prev.revenue += Number(a.revenue) || 0;
+      prev.countries += Number(a.countries) || 0;
+      prev.appCount += 1;
+      prev.brand = WA.brandDisplay(a.brand) || prev.brand;
+      map.set(k, prev);
+    }
+    const hit = new Set(list.map((a) => `${a.package}\t${WA.canonBrandKey(a.brand)}`));
+    if (hit.size) {
+      const scopedDead = scoped.filter((r) => r.package && hit.has(`${r.package}\t${WA.canonBrandKey(r.brand)}`));
+      const geo = WA.groupBy(scopedDead, (r) => WA.canonBrandKey(r.brand));
+      for (const g of geo) {
+        const row = map.get(g.key);
+        if (row) row.countries = g.countries.size;
+      }
+    }
+    for (const row of map.values()) row.rate = WA.pct(row.sales, row.leads);
+    return [...map.values()];
+  };
   const brandState = { key: "installs", dir: "desc" };
   const appState = { key: "installs", dir: "desc" };
   let appPage = 1;
   const draw = () => {
-    const deadBrands = WA.sortRows(brands.filter(keep), brandState.key, brandState.dir);
-    const deadApps = WA.sortRows(apps.filter(keep), appState.key, appState.dir);
+    const deadApps = WA.sortRows(apps.filter(keepApp), appState.key, appState.dir);
+    const deadBrands = WA.sortRows(brandsFromApps(deadApps), brandState.key, brandState.dir);
     document.getElementById("dead-brands-title").textContent = `Бренды · ${deadBrands.length}`;
     document.getElementById("dead-apps-title").textContent = `Приложения · ${deadApps.length}`;
     const kpis = document.getElementById("kpis");
     if (kpis) {
-      const inst = deadBrands.reduce((s, r) => s + (Number(r.installs) || 0), 0);
-      const leads = deadBrands.reduce((s, r) => s + (Number(r.leads) || 0), 0);
+      const inst = deadApps.reduce((s, r) => s + (Number(r.installs) || 0), 0);
+      const leads = deadApps.reduce((s, r) => s + (Number(r.leads) || 0), 0);
       kpis.innerHTML = [
         ["Беспонт брендов", WA.num(deadBrands.length)],
         ["Беспонт прил", WA.num(deadApps.length)],

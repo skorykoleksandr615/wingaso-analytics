@@ -448,6 +448,12 @@ WA.pageApps = async () => {
       return hit && (!active || last >= from7) && WA.matchZero(a, WA.tableState.extra);
     });
     rows = WA.sortRows(rows, WA.tableState.sortKey, WA.tableState.sortDir);
+    const title = document.getElementById("apps-title");
+    if (title) {
+      title.textContent = rows.length === all.length
+        ? `Приложения · ${WA.num(all.length)}`
+        : `Приложения · ${WA.num(rows.length)} из ${WA.num(all.length)}`;
+    }
     const page = WA.paginate(rows);
     document.querySelector("#app-table tbody").innerHTML = page.rows.map((a) => `
       <tr data-href="${WA.href("/app.html", { p: a.package, b: a.brand })}">

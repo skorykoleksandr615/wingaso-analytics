@@ -147,7 +147,8 @@ WA.BLOCKED_PKGS = new Set([
   "fittools.ir",
   "norsktipping.space",
   "volevbetares.ink",
-  "com.bomok.hiterion.moonpi"
+  "com.bomok.hiterion.moonpi",
+  "com.odnokoni.budino.gemiron"
 ]);
 WA.isBlockedPkg = (p) => WA.BLOCKED_PKGS.has(WA.clean(p).toLowerCase());
 WA.isPkg = (p) => {

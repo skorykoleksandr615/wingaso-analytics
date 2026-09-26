@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=31">
+  <link rel="stylesheet" href="/css/style.css?v=32">
 </head>
 <body data-page="daily">
   <header class="app-header" id="app-header"></header>
@@ -24,20 +24,24 @@
     <article class="card chart-card" style="margin-bottom:12px">
       <div class="chart-head">
         <h2 id="stack-title">Топ брендов — выручка</h2>
-        <select class="field" id="top-n" aria-label="Сколько брендов в топе">
-          <option value="3">Топ 3</option>
-          <option value="5">Топ 5</option>
-          <option value="8">Топ 8</option>
-          <option value="10">Топ 10</option>
-          <option value="15">Топ 15</option>
-          <option value="20">Топ 20</option>
-          <option value="30">Топ 30</option>
-          <option value="50">Топ 50</option>
-          <option value="75">Топ 75</option>
-          <option value="100">Топ 100</option>
-          <option value="150">Топ 150</option>
-          <option value="200">Топ 200</option>
-        </select>
+        <div class="chart-tools">
+          <select class="field" id="top-n" aria-label="Сколько брендов в топе">
+            <option value="3">Топ 3</option>
+            <option value="5">Топ 5</option>
+            <option value="8">Топ 8</option>
+            <option value="10">Топ 10</option>
+            <option value="15">Топ 15</option>
+            <option value="20">Топ 20</option>
+            <option value="30">Топ 30</option>
+            <option value="50">Топ 50</option>
+            <option value="75">Топ 75</option>
+            <option value="100">Топ 100</option>
+            <option value="150">Топ 150</option>
+            <option value="200">Топ 200</option>
+            <option value="300">Топ 300</option>
+          </select>
+          <button type="button" id="top-csv">Скачать CSV</button>
+        </div>
       </div>
       <div class="chart-wrap"><canvas id="stack-area"></canvas></div>
     </article>
@@ -68,6 +72,6 @@
   <script src="/js/ui.js?v=14"></script>
   <script src="/js/charts.js?v=16"></script>
   <script src="/js/tables.js?v=3"></script>
-  <script src="/js/main.js?v=36"></script>
+  <script src="/js/main.js?v=37"></script>
 </body>
 </html>

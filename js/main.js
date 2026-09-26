@@ -646,12 +646,14 @@ WA.pageDaily = async () => {
   const topSel = document.getElementById("top-n");
   const drawStack = () => {
     const raw = Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5);
-    const n = Math.max(3, Math.min(200, raw || 5));
+    const n = Math.max(3, Math.min(300, raw || 5));
     if (topSel) topSel.value = String(n);
     localStorage.setItem("wa-top-n", String(n));
     const title = document.getElementById("stack-title");
     if (title) title.textContent = `Топ-${n} брендов · ${WA.periodLabel(b.from, b.to)}`;
     const top = ranked.slice(0, n);
+    const wrap = document.getElementById("stack-area")?.parentElement;
+    if (wrap) wrap.style.height = `${Math.min(2400, Math.max(260, n * 22))}px`;
     WA.hBar("stack-area", top.map((x) => x.key), top.map((x) => x.revenue));
     const host = document.getElementById("stack-area")?.closest(".chart-card");
     if (host) {
@@ -671,6 +673,27 @@ WA.pageDaily = async () => {
     topSel.value = localStorage.getItem("wa-top-n") || "5";
     topSel.onchange = drawStack;
     topSel.oninput = drawStack;
+  }
+  const csvBtn = document.getElementById("top-csv");
+  if (csvBtn) {
+    csvBtn.onclick = () => {
+      const n = Math.max(3, Math.min(300, Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5) || 5));
+      const top = ranked.slice(0, n);
+      WA.csv(`wingaso-top-${n}-${b.from}-${b.to}.csv`,
+        ["#","Бренд","Прилы","Страны","Инсталы","Регистрации","Депозиты","Выручка","Конверсия","Доля %"],
+        top.map((x, i) => [
+          i + 1,
+          x.key,
+          x.apps ? x.apps.size : 0,
+          x.countries ? x.countries.size : 0,
+          x.hasInstalls ? x.installs : "",
+          x.leads,
+          x.sales,
+          (x.revenue || 0).toFixed(2),
+          WA.pct(x.sales, x.leads).toFixed(1),
+          ((x.revenue || 0) / periodRev * 100).toFixed(1)
+        ]));
+    };
   }
   drawStack();
 };

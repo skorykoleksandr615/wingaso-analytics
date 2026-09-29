@@ -652,7 +652,7 @@ WA.pageDaily = async () => {
   const topSel = document.getElementById("top-n");
   const drawStack = () => {
     const raw = Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5);
-    const n = Math.max(3, Math.min(300, raw || 5));
+    const n = Math.max(3, Math.min(500, raw || 5));
     if (topSel) topSel.value = String(n);
     localStorage.setItem("wa-top-n", String(n));
     const title = document.getElementById("stack-title");
@@ -683,7 +683,7 @@ WA.pageDaily = async () => {
   const csvBtn = document.getElementById("top-csv");
   if (csvBtn) {
     csvBtn.onclick = () => {
-      const n = Math.max(3, Math.min(300, Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5) || 5));
+      const n = Math.max(3, Math.min(500, Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5) || 5));
       const top = ranked.slice(0, n);
       WA.csv(`wingaso-top-${n}-${b.from}-${b.to}.csv`,
         ["#","Бренд","Прилы","Страны","Инсталы","Регистрации","Депозиты","Выручка","Конверсия","Доля %"],

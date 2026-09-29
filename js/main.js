@@ -660,7 +660,7 @@ WA.pageDaily = async () => {
     const top = ranked.slice(0, n);
     const wrap = document.getElementById("stack-area")?.parentElement;
     if (wrap) wrap.style.height = `${Math.min(2400, Math.max(260, n * 22))}px`;
-    WA.hBar("stack-area", top.map((x, i) => `${i + 1}. ${x.key}`), top.map((x) => x.revenue));
+    WA.hBar("stack-area", top.map((x) => x.key), top.map((x) => x.revenue), { rank: true });
     const host = document.getElementById("stack-area")?.closest(".chart-card");
     if (host) {
       let el = host.querySelector(".chart-pct");
@@ -671,7 +671,7 @@ WA.pageDaily = async () => {
       }
       const share = b.from === b.to ? "дня" : "периода";
       el.innerHTML = top.length <= 20
-        ? top.map((x, i) => `<span style="--i:${i}"><b>${i + 1} место · ${WA.esc(x.key)}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("")
+        ? top.map((x, i) => `<span style="--i:${i}"><i class="place${i < 3 ? " place-top" : ""}">${i + 1}</i><b>${WA.esc(x.key)}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("")
         : "";
     }
     const rankTitle = document.getElementById("top-rank-title");
@@ -680,7 +680,7 @@ WA.pageDaily = async () => {
     if (rankBody) {
       rankBody.innerHTML = top.map((x, i) => `
         <tr data-href="${WA.href("/brand.html", { b: x.key })}">
-          <td class="num">${i + 1}</td>
+          <td class="place-col"><span class="place${i < 3 ? " place-top" : ""}">${i + 1}</span></td>
           <td>${WA.esc(x.key)}</td>
           <td class="num">${x.apps ? WA.num(x.apps.size) : "0"}</td>
           <td class="num">${WA.num(x.leads)}</td>
@@ -693,10 +693,13 @@ WA.pageDaily = async () => {
     const rankCards = document.getElementById("top-rank-cards");
     if (rankCards) {
       rankCards.innerHTML = top.map((x, i) => `
-        <a class="card mobile-card" href="${WA.href("/brand.html", { b: x.key })}">
-          <strong>${i + 1} место · ${WA.esc(x.key)}</strong>
+        <a class="card mobile-card place-card" href="${WA.href("/brand.html", { b: x.key })}">
+          <span class="place${i < 3 ? " place-top" : ""}">${i + 1}</span>
+          <div>
+          <strong>${WA.esc(x.key)}</strong>
           <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
           <div class="row"><span class="muted">Рег. / деп. / доля</span><span class="mono">${WA.num(x.leads)} / ${WA.num(x.sales)} / ${((x.revenue || 0) / periodRev * 100).toFixed(1)}%</span></div>
+          </div>
         </a>`).join("");
     }
   };

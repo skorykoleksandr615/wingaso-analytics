@@ -276,7 +276,7 @@ WA.barCompare = (id, labels, leads, sales) => {
   return chart;
 };
 
-WA.hBar = (id, labels, data) => {
+WA.hBar = (id, labels, data, opts = {}) => {
   const el = document.getElementById(id);
   if (!el) return;
   const prev = Chart.getChart(el);
@@ -290,6 +290,20 @@ WA.hBar = (id, labels, data) => {
   }
   const t = WA.baseChart();
   const values = data.map((v) => Number(v) || 0);
+  const rankW = String(labels.length).length;
+  const yTicks = {
+    color: t.text,
+    autoSkip: false,
+    maxTicksLimit: 500
+  };
+  if (opts.rank) {
+    yTicks.color = t.tick;
+    yTicks.font = { family: "JetBrains Mono, ui-monospace, monospace", size: 11, weight: "500" };
+    yTicks.callback = function (val, i) {
+      const name = this.getLabelForValue(val);
+      return `${String(i + 1).padStart(rankW, " ")}   ${name}`;
+    };
+  }
   const chart = new Chart(el, {
     type: "bar",
     data: {
@@ -301,12 +315,16 @@ WA.hBar = (id, labels, data) => {
       responsive: true,
       maintainAspectRatio: false,
       animation: labels.length > 40 ? { duration: 0 } : WA.chartAnim(),
-      layout: { padding: { right: 92 } },
+      layout: { padding: { right: 92, left: opts.rank ? 4 : 0 } },
       plugins: {
         waBarMoney: true,
         legend: { display: false },
         tooltip: {
           callbacks: {
+            title: (items) => {
+              const i = items[0]?.dataIndex ?? 0;
+              return opts.rank ? `${i + 1} место · ${labels[i]}` : labels[i];
+            },
             label: (ctx) => {
               const total = values.reduce((s, v) => s + v, 0) || 1;
               const p = (ctx.parsed.x / total * 100).toFixed(1);
@@ -317,7 +335,7 @@ WA.hBar = (id, labels, data) => {
       },
       scales: {
         x: { ticks: { color: t.tick }, grid: { color: t.grid }, grace: "18%" },
-        y: { ticks: { color: t.text, autoSkip: false, maxTicksLimit: 200 }, grid: { display: false } }
+        y: { ticks: yTicks, grid: { display: false } }
       }
     },
     plugins: [WA.barPctPlugin]

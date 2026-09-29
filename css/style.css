@@ -507,6 +507,44 @@ table.data td.num, table.data th.num { text-align: right; font-family: var(--mon
   animation-delay: calc(var(--i, 0) * 45ms);
 }
 .chart-pct b { color: var(--text-primary); font-weight: 600; margin-right: 4px; }
+.chart-pct .place { margin-right: 8px; }
+.place-col {
+  width: 84px;
+  text-align: left !important;
+  font-family: var(--mono);
+}
+#top-rank-table td.place-col,
+#top-rank-table th.place-col {
+  text-align: left !important;
+  padding-left: 16px;
+}
+.place {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 2.75em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+  color: var(--gold);
+  background: rgba(201, 163, 106, .1);
+  border: 1px solid rgba(201, 163, 106, .24);
+}
+.place-top {
+  background: rgba(201, 163, 106, .2);
+  border-color: rgba(201, 163, 106, .42);
+  color: var(--accent-hover);
+}
+.place-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.place-card .place { margin-top: 2px; flex: 0 0 auto; }
 .pkg-cell { white-space: normal; min-width: 220px; max-width: 420px; }
 .pkg-list {
   display: flex;

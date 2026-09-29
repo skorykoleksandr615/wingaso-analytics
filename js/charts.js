@@ -276,6 +276,42 @@ WA.barCompare = (id, labels, leads, sales) => {
   return chart;
 };
 
+WA.rankLabelPlugin = {
+  id: "waRankLabels",
+  afterDatasetsDraw(chart) {
+    if (!chart.$rankLabels) return;
+    const y = chart.scales.y;
+    if (!y) return;
+    const labels = chart.data.labels || [];
+    const ctx = chart.ctx;
+    const rankCol = labels.length >= 100 ? 36 : 28;
+    const nameX = y.left + rankCol + 12;
+    const maxName = Math.max(48, y.right - nameX - 8);
+    const gold = getComputedStyle(document.documentElement).getPropertyValue("--gold").trim() || "#c9a36a";
+    const ink = WA.chartTheme().text;
+    const small = labels.length > 40;
+    ctx.save();
+    labels.forEach((name, i) => {
+      const cy = y.getPixelForValue(i);
+      ctx.font = `700 ${small ? 10 : 12}px JetBrains Mono, ui-monospace, monospace`;
+      ctx.fillStyle = gold;
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(i + 1), y.left + rankCol, cy);
+      ctx.font = `500 ${small ? 11 : 13}px Inter, system-ui, sans-serif`;
+      ctx.fillStyle = ink;
+      ctx.textAlign = "left";
+      let text = String(name || "");
+      if (ctx.measureText(text).width > maxName) {
+        while (text.length > 2 && ctx.measureText(text + "…").width > maxName) text = text.slice(0, -1);
+        text = text.trimEnd() + "…";
+      }
+      ctx.fillText(text, nameX, cy);
+    });
+    ctx.restore();
+  }
+};
+
 WA.hBar = (id, labels, data, opts = {}) => {
   const el = document.getElementById(id);
   if (!el) return;
@@ -290,20 +326,6 @@ WA.hBar = (id, labels, data, opts = {}) => {
   }
   const t = WA.baseChart();
   const values = data.map((v) => Number(v) || 0);
-  const rankW = String(labels.length).length;
-  const yTicks = {
-    color: t.text,
-    autoSkip: false,
-    maxTicksLimit: 500
-  };
-  if (opts.rank) {
-    yTicks.color = t.tick;
-    yTicks.font = { family: "JetBrains Mono, ui-monospace, monospace", size: 11, weight: "500" };
-    yTicks.callback = function (val, i) {
-      const name = this.getLabelForValue(val);
-      return `${String(i + 1).padStart(rankW, " ")}   ${name}`;
-    };
-  }
   const chart = new Chart(el, {
     type: "bar",
     data: {
@@ -315,7 +337,7 @@ WA.hBar = (id, labels, data, opts = {}) => {
       responsive: true,
       maintainAspectRatio: false,
       animation: labels.length > 40 ? { duration: 0 } : WA.chartAnim(),
-      layout: { padding: { right: 92, left: opts.rank ? 4 : 0 } },
+      layout: { padding: { right: 92 } },
       plugins: {
         waBarMoney: true,
         legend: { display: false },
@@ -335,11 +357,23 @@ WA.hBar = (id, labels, data, opts = {}) => {
       },
       scales: {
         x: { ticks: { color: t.tick }, grid: { color: t.grid }, grace: "18%" },
-        y: { ticks: yTicks, grid: { display: false } }
+        y: {
+          ticks: {
+            display: !opts.rank,
+            color: t.text,
+            autoSkip: false,
+            maxTicksLimit: 500
+          },
+          afterFit(scale) {
+            if (opts.rank) scale.width = labels.length > 80 ? 208 : 228;
+          },
+          grid: { display: false }
+        }
       }
     },
-    plugins: [WA.barPctPlugin]
+    plugins: [WA.barPctPlugin, WA.rankLabelPlugin]
   });
+  chart.$rankLabels = !!opts.rank;
   WA.pctLegend(id, labels, values);
   requestAnimationFrame(() => chart.resize());
   return chart;

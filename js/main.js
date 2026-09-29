@@ -660,7 +660,7 @@ WA.pageDaily = async () => {
     const top = ranked.slice(0, n);
     const wrap = document.getElementById("stack-area")?.parentElement;
     if (wrap) wrap.style.height = `${Math.min(2400, Math.max(260, n * 22))}px`;
-    WA.hBar("stack-area", top.map((x) => x.key), top.map((x) => x.revenue));
+    WA.hBar("stack-area", top.map((x, i) => `${i + 1}. ${x.key}`), top.map((x) => x.revenue));
     const host = document.getElementById("stack-area")?.closest(".chart-card");
     if (host) {
       let el = host.querySelector(".chart-pct");
@@ -671,8 +671,33 @@ WA.pageDaily = async () => {
       }
       const share = b.from === b.to ? "дня" : "периода";
       el.innerHTML = top.length <= 20
-        ? top.map((x, i) => `<span style="--i:${i}"><b>${WA.esc(x.key)}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("")
+        ? top.map((x, i) => `<span style="--i:${i}"><b>${i + 1} место · ${WA.esc(x.key)}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("")
         : "";
+    }
+    const rankTitle = document.getElementById("top-rank-title");
+    if (rankTitle) rankTitle.textContent = `Места · топ ${top.length}`;
+    const rankBody = document.querySelector("#top-rank-table tbody");
+    if (rankBody) {
+      rankBody.innerHTML = top.map((x, i) => `
+        <tr data-href="${WA.href("/brand.html", { b: x.key })}">
+          <td class="num">${i + 1}</td>
+          <td>${WA.esc(x.key)}</td>
+          <td class="num">${x.apps ? WA.num(x.apps.size) : "0"}</td>
+          <td class="num">${WA.num(x.leads)}</td>
+          <td class="num">${WA.num(x.sales)}</td>
+          <td class="num">${WA.money2(x.revenue)}</td>
+          <td class="num">${((x.revenue || 0) / periodRev * 100).toFixed(1)}%</td>
+        </tr>`).join("");
+      rankBody.querySelectorAll("tr[data-href]").forEach((tr) => { tr.onclick = () => { location.href = tr.dataset.href; }; });
+    }
+    const rankCards = document.getElementById("top-rank-cards");
+    if (rankCards) {
+      rankCards.innerHTML = top.map((x, i) => `
+        <a class="card mobile-card" href="${WA.href("/brand.html", { b: x.key })}">
+          <strong>${i + 1} место · ${WA.esc(x.key)}</strong>
+          <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
+          <div class="row"><span class="muted">Рег. / деп. / доля</span><span class="mono">${WA.num(x.leads)} / ${WA.num(x.sales)} / ${((x.revenue || 0) / periodRev * 100).toFixed(1)}%</span></div>
+        </a>`).join("");
     }
   };
   if (topSel) {
@@ -686,7 +711,7 @@ WA.pageDaily = async () => {
       const n = Math.max(3, Math.min(500, Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5) || 5));
       const top = ranked.slice(0, n);
       WA.csv(`wingaso-top-${n}-${b.from}-${b.to}.csv`,
-        ["#","Бренд","Прилы","Страны","Инсталы","Регистрации","Депозиты","Выручка","Конверсия","Доля %"],
+        ["Место","Бренд","Прилы","Страны","Инсталы","Регистрации","Депозиты","Выручка","Конверсия","Доля %"],
         top.map((x, i) => [
           i + 1,
           x.key,

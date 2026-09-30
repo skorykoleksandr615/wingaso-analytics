@@ -646,8 +646,14 @@ WA.pageDaily = async () => {
   drawDays();
   const periodRev = days.reduce((s, d) => s + (d.revenue || 0), 0) || 1;
   const ranked = WA.groupBy(agg, (r) => WA.canonBrandKey(r.brand)).map((x) => ({
-    ...x,
-    key: WA.brandDisplay([...x.brands][0] || x.key)
+    brand: WA.brandDisplay([...x.brands][0] || x.key),
+    revenue: Number(x.revenue) || 0,
+    leads: Number(x.leads) || 0,
+    sales: Number(x.sales) || 0,
+    installs: Number(x.installs) || 0,
+    hasInstalls: !!x.hasInstalls,
+    apps: x.apps ? x.apps.size : 0,
+    countries: x.countries ? x.countries.size : 0
   })).sort((a, c) => c.revenue - a.revenue);
   const topSel = document.getElementById("top-n");
   const drawStack = () => {
@@ -658,9 +664,11 @@ WA.pageDaily = async () => {
     const title = document.getElementById("stack-title");
     if (title) title.textContent = `Топ-${n} брендов · ${WA.periodLabel(b.from, b.to)}`;
     const top = ranked.slice(0, n);
+    const topSum = top.reduce((s, x) => s + x.revenue, 0) || 1;
+    WA.lastTop = { rows: top, n, from: b.from, to: b.to, topSum, periodRev };
     const wrap = document.getElementById("stack-area")?.parentElement;
     if (wrap) wrap.style.height = `${Math.min(2400, Math.max(260, n * 22))}px`;
-    WA.hBar("stack-area", top.map((x) => x.key), top.map((x) => x.revenue), { rank: true });
+    WA.hBar("stack-area", top.map((x) => x.brand), top.map((x) => x.revenue), { rank: true });
     const host = document.getElementById("stack-area")?.closest(".chart-card");
     if (host) {
       let el = host.querySelector(".chart-pct");
@@ -671,7 +679,7 @@ WA.pageDaily = async () => {
       }
       const share = b.from === b.to ? "дня" : "периода";
       el.innerHTML = top.length <= 20
-        ? top.map((x, i) => `<span style="--i:${i}"><i class="place${i < 3 ? " place-top" : ""}">${i + 1}</i><b>${WA.esc(x.key)}</b> ${WA.money2(x.revenue)} · ${(x.revenue / periodRev * 100).toFixed(1)}% ${share}</span>`).join("")
+        ? top.map((x, i) => `<span style="--i:${i}"><i class="place${i < 3 ? " place-top" : ""}">${i + 1}</i><b>${WA.esc(x.brand)}</b> ${WA.money2(x.revenue)} · ${(x.revenue / topSum * 100).toFixed(1)}% ${share}</span>`).join("")
         : "";
     }
     const rankTitle = document.getElementById("top-rank-title");
@@ -679,26 +687,26 @@ WA.pageDaily = async () => {
     const rankBody = document.querySelector("#top-rank-table tbody");
     if (rankBody) {
       rankBody.innerHTML = top.map((x, i) => `
-        <tr data-href="${WA.href("/brand.html", { b: x.key })}">
+        <tr data-href="${WA.href("/brand.html", { b: x.brand })}">
           <td class="place-col"><span class="place${i < 3 ? " place-top" : ""}">${i + 1}</span></td>
-          <td>${WA.esc(x.key)}</td>
-          <td class="num">${x.apps ? WA.num(x.apps.size) : "0"}</td>
+          <td>${WA.esc(x.brand)}</td>
+          <td class="num">${WA.num(x.apps)}</td>
           <td class="num">${WA.num(x.leads)}</td>
           <td class="num">${WA.num(x.sales)}</td>
           <td class="num">${WA.money2(x.revenue)}</td>
-          <td class="num">${((x.revenue || 0) / periodRev * 100).toFixed(1)}%</td>
+          <td class="num">${(x.revenue / topSum * 100).toFixed(1)}%</td>
         </tr>`).join("");
       rankBody.querySelectorAll("tr[data-href]").forEach((tr) => { tr.onclick = () => { location.href = tr.dataset.href; }; });
     }
     const rankCards = document.getElementById("top-rank-cards");
     if (rankCards) {
       rankCards.innerHTML = top.map((x, i) => `
-        <a class="card mobile-card place-card" href="${WA.href("/brand.html", { b: x.key })}">
+        <a class="card mobile-card place-card" href="${WA.href("/brand.html", { b: x.brand })}">
           <span class="place${i < 3 ? " place-top" : ""}">${i + 1}</span>
           <div>
-          <strong>${WA.esc(x.key)}</strong>
+          <strong>${WA.esc(x.brand)}</strong>
           <div class="row"><span class="muted">Выручка</span><span class="mono">${WA.money2(x.revenue)}</span></div>
-          <div class="row"><span class="muted">Рег. / деп. / доля</span><span class="mono">${WA.num(x.leads)} / ${WA.num(x.sales)} / ${((x.revenue || 0) / periodRev * 100).toFixed(1)}%</span></div>
+          <div class="row"><span class="muted">Рег. / деп. / доля</span><span class="mono">${WA.num(x.leads)} / ${WA.num(x.sales)} / ${(x.revenue / topSum * 100).toFixed(1)}%</span></div>
           </div>
         </a>`).join("");
     }
@@ -711,21 +719,23 @@ WA.pageDaily = async () => {
   const csvBtn = document.getElementById("top-csv");
   if (csvBtn) {
     csvBtn.onclick = () => {
-      const n = Math.max(3, Math.min(500, Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5) || 5));
-      const top = ranked.slice(0, n);
-      WA.csv(`wingaso-top-${n}-${b.from}-${b.to}.csv`,
+      const snap = WA.lastTop;
+      if (!snap || !snap.rows.length) return;
+      const top = snap.rows;
+      const topSum = snap.topSum || 1;
+      WA.csv(`wingaso-top-${snap.n}-${snap.from}-${snap.to}.csv`,
         ["Место","Бренд","Прилы","Страны","Инсталы","Регистрации","Депозиты","Выручка","Конверсия","Доля %"],
         top.map((x, i) => [
           i + 1,
-          x.key,
-          x.apps ? x.apps.size : 0,
-          x.countries ? x.countries.size : 0,
+          x.brand,
+          x.apps,
+          x.countries,
           x.hasInstalls ? x.installs : "",
           x.leads,
           x.sales,
-          (x.revenue || 0).toFixed(2),
-          WA.pct(x.sales, x.leads).toFixed(1),
-          ((x.revenue || 0) / periodRev * 100).toFixed(1)
+          x.revenue.toFixed(2).replace(".", ","),
+          WA.pct(x.sales, x.leads).toFixed(1).replace(".", ","),
+          (x.revenue / topSum * 100).toFixed(1).replace(".", ",")
         ]));
     };
   }

@@ -107,10 +107,11 @@ WA.renderPager = (host, pageObj, onChange) => {
   host.querySelector("[data-act=csv]").onclick = () => host.dispatchEvent(new CustomEvent("csv"));
 };
 
-WA.csv = (filename, headers, rows) => {
+WA.csv = (filename, headers, rows, opts = {}) => {
+  const sep = opts.sep || ";";
   const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const lines = [headers.map(esc).join(",")].concat(rows.map((r) => r.map(esc).join(",")));
-  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+  const lines = [headers.map(esc).join(sep)].concat(rows.map((r) => r.map(esc).join(sep)));
+  const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = filename;

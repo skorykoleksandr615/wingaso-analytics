@@ -714,7 +714,6 @@ WA.pageDaily = async () => {
   if (topSel) {
     topSel.value = localStorage.getItem("wa-top-n") || "5";
     topSel.onchange = drawStack;
-    topSel.oninput = drawStack;
   }
   const csvBtn = document.getElementById("top-csv");
   if (csvBtn) {

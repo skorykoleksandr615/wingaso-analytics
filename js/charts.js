@@ -279,7 +279,7 @@ WA.barCompare = (id, labels, leads, sales) => {
 WA.rankLabelPlugin = {
   id: "waRankLabels",
   afterDatasetsDraw(chart) {
-    if (!chart.$rankLabels) return;
+    if (!chart.options.plugins?.waRankLabels) return;
     const y = chart.scales.y;
     if (!y) return;
     const labels = chart.data.labels || [];
@@ -340,6 +340,7 @@ WA.hBar = (id, labels, data, opts = {}) => {
       layout: { padding: { right: 92 } },
       plugins: {
         waBarMoney: true,
+        waRankLabels: !!opts.rank,
         legend: { display: false },
         tooltip: {
           callbacks: {
@@ -373,7 +374,6 @@ WA.hBar = (id, labels, data, opts = {}) => {
     },
     plugins: [WA.barPctPlugin, WA.rankLabelPlugin]
   });
-  chart.$rankLabels = !!opts.rank;
   WA.pctLegend(id, labels, values);
   requestAnimationFrame(() => chart.resize());
   return chart;

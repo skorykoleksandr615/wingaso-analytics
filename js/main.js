@@ -658,7 +658,7 @@ WA.pageDaily = async () => {
   const topSel = document.getElementById("top-n");
   const drawStack = () => {
     const raw = Number((topSel && topSel.value) || localStorage.getItem("wa-top-n") || 5);
-    const n = Math.max(3, Math.min(500, raw || 5));
+    const n = Math.max(3, Math.min(1000, raw || 5));
     if (topSel) topSel.value = String(n);
     localStorage.setItem("wa-top-n", String(n));
     const title = document.getElementById("stack-title");
@@ -667,7 +667,8 @@ WA.pageDaily = async () => {
     const topSum = top.reduce((s, x) => s + x.revenue, 0) || 1;
     WA.lastTop = { rows: top, n, from: b.from, to: b.to, topSum, periodRev };
     const wrap = document.getElementById("stack-area")?.parentElement;
-    if (wrap) wrap.style.height = `${Math.min(2400, Math.max(260, n * 22))}px`;
+    const chartH = n <= 500 ? Math.min(2400, Math.max(260, n * 22)) : Math.round(n * 4.8);
+    if (wrap) wrap.style.height = `${chartH}px`;
     WA.hBar("stack-area", top.map((x) => x.brand), top.map((x) => x.revenue), { rank: true });
     const host = document.getElementById("stack-area")?.closest(".chart-card");
     if (host) {

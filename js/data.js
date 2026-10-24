@@ -65,7 +65,12 @@ WA.rememberBrand = (pkg, brand, force) => {
   if (force || !WA.pkgBrand.has(p)) WA.pkgBrand.set(p, b);
 };
 WA.brandOfPkg = (pkg) => (WA.pkgBrand && WA.pkgBrand.get(WA.clean(pkg))) || "";
+WA.BRAND_FIX = {
+  "com.trap.wheat.chain.crest.soft": "Paddy Power"
+};
 WA.remapBrand = (pkg, brand) => {
+  const fixed = WA.BRAND_FIX[WA.clean(pkg).toLowerCase()];
+  if (fixed) return fixed;
   const b = WA.clean(brand);
   if (WA.isUnknownBrand(b)) return WA.brandOfPkg(pkg) || b;
   return b;
@@ -241,8 +246,9 @@ WA.loadCore = async () => {
   WA.countries = countries;
   WA.apps = apps.filter((a) => WA.isPkg(a.package)).map((a) => {
     const pkg = WA.clean(a.package);
-    WA.rememberBrand(pkg, a.brand);
-    return { ...a, brand: a.brand, package: pkg };
+    const brand = WA.remapBrand(pkg, a.brand);
+    WA.rememberBrand(pkg, brand, true);
+    return { ...a, brand, package: pkg };
   });
   WA.daily = daily.slice().sort((a, b) => a.date.localeCompare(b.date));
   return WA;
